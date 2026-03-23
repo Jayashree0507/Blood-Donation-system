@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sanguis - Premium Blood Management System</title>
+    <meta name="description"
+        content="A state-of-the-art blood management and donation system. Connect donors with those in need seamlessly.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="pager.css">
+
+    <!-- Icons (Phosphor Icons) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        .emergency-popup {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50vh;
+            /* Covers half the screen */
+            background: linear-gradient(0deg, rgba(20, 5, 5, 0.95), rgba(45, 0, 0, 0.9));
+            border-top: 5px solid #ff3b30;
+            z-index: 9999;
+            transform: translateY(105%);
+            transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            backdrop-filter: blur(25px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 -15px 50px rgba(255, 59, 48, 0.4);
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .emergency-popup.show {
+            transform: translateY(0);
+        }
+
+        .emergency-popup-content {
+            max-width: 900px;
+            width: 100%;
+            animation: pulse-border 2s infinite;
+            border-radius: 20px;
+            padding: 3rem;
+            background: rgba(255, 59, 48, 0.05);
+            border: 1px solid rgba(255, 59, 48, 0.2);
+            position: relative;
+        }
+
+        @keyframes pulse-border {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 20px rgba(255, 59, 48, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 59, 48, 0);
+            }
+        }
+
+        .popup-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 2rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .popup-close:hover {
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .emergency-popup {
+                height: 60vh;
+                padding: 1rem;
+                border-top: 3px solid #ff3b30;
+            }
+
+            .emergency-popup-content {
+                padding: 2rem 1rem;
+            }
+
+            .emergency-popup-content h1 {
+                font-size: 1.8rem !important;
+            }
+
+            .emergency-popup-content h2 {
+                font-size: 1.5rem !important;
+                margin-bottom: 1rem !important;
+            }
+
+            .emergency-meta {
+                flex-direction: column;
+                gap: 0.8rem;
+                font-size: 1rem !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="dark-theme">
+    <div class="blob-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="brand">
+                <i class="ph-fill ph-drop text-primary"></i>
+                <span>BloodBee</span>
+            </a>
+
+            <div class="nav-links">
+                <a href="index.html" class="nav-link active">Home</a>
+                <a href="register.html" class="nav-link">Register</a>
+                <a href="donors.html" class="nav-link">Donor</a>
+                <a href="#emergency" class="nav-link">Emergency</a>
+                <a href="inventory.html" class="nav-link">Inventory</a>
+            </div>
+
+            <div class="nav-actions">
+                <button class="btn btn-outline" id="loginBtn">Login</button>
+                <button class="btn btn-primary" id="requestBtn">Request Blood</button>
+            </div>
+
+            <button class="mobile-toggle" id="mobileToggle">
+                <i class="ph ph-list"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section id="home" class="hero-section">
+            <div class="hero-content">
+                <div class="badge">
+                    <span class="pulsing-dot"></span>
+                    Live Urgent Requirements
+                </div>
+                <h1 class="hero-title">Every Drop <br><span class="gradient-text">Counts.</span> Every Life <br>Matters.
+                </h1>
+                <p class="hero-subtitle">Connect directly with blood banks, hospitals, and willing donors near you. A
+                    unified, modern platform for seamless blood management and saving lives.</p>
+
+                <div class="hero-cta">
+                    <button class="btn btn-primary btn-lg"
+                        onclick="document.getElementById('inventory').scrollIntoView({behavior: 'smooth'})">Find Blood<i
+                            class="ph ph-magnifying-glass"></i></button>
+                    <button class="btn btn-glass btn-lg"
+                        onclick="document.getElementById('donate').scrollIntoView({behavior: 'smooth'})">Become a
+                        Donor</button>
+                </div>
+
+                <div class="stats-row">
+                    <div class="stat-card glass-panel">
+                        <i class="ph-fill ph-users"></i>
+                        <div class="stat-info">
+                            <h3>14,200+</h3>
+                            <p>Active Donors</p>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel">
+                        <i class="ph-fill ph-heartbeat"></i>
+                        <div class="stat-info">
+                            <h3>8,450+</h3>
+                            <p>Lives Saved</p>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel">
+                        <i class="ph-fill ph-buildings"></i>
+                        <div class="stat-info">
+                            <h3>120+</h3>
+                            <p>Partner Hospitals</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="glass-mockup">
+                    <div class="mockup-header">
+                        <div class="mockup-dots"><span></span><span></span><span></span></div>
+                        <div class="mockup-title">Live Tracking</div>
+                    </div>
+                    <div class="mockup-body" id="homeRequestsContainer">
+                        <div class="tracking-card">
+                            <div class="blood-type-badge" style="background: rgba(255,255,255,0.1); font-size: 1rem;"><i
+                                    class="ph ph-spinner ph-spin"></i></div>
+                            <div class="tracking-info">
+                                <h4>Loading Live Requests...</h4>
+                                <p>System Monitoring</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Emergency Section -->
+        <section id="emergency" class="inventory-section mt-4" style="min-height: auto; padding-top:4rem;">
+            <div class="section-header">
+                <div class="badge"
+                    style="background: rgba(255, 59, 48, 0.1); color: #ff3b30; border-color: rgba(255, 59, 48, 0.3);">
+                    <span class="pulsing-dot"
+                        style="background:#ff3b30; box-shadow:0 0 0 0 rgba(255,59,48,0.7);"></span>
+                    Active Emergencies
+                </div>
+                <h2>Live Patient <span
+                        style="background: linear-gradient(135deg, #ff3b30, #ff8c00); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Requests</span>
+                </h2>
+                <p>These patients require immediate attention. Requests automatically resolve or expire after 24 hours.
+                </p>
+            </div>
+
+            <div class="inventory-grid" id="emergencyRequestsContainer">
+                <!-- Populated by JS -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-brand">
+                <a href="#" class="brand">
+                    <i class="ph-fill ph-drop text-primary"></i>
+                    <span>BloodBee</span>
+                </a>
+                <p>Innovating blood management and connecting life-saving resources efficiently across the globe.</p>
+            </div>
+            <div class="footer-links">
+                <div class="link-group">
+                    <h4>Platform</h4>
+                    <a href="#">Inventory</a>
+                    <a href="#">Hospitals</a>
+                    <a href="#">Donors</a>
+                </div>
+                <div class="link-group">
+                    <h4>Resources</h4>
+                    <a href="#">Eligibility Guidelines</a>
+                    <a href="#">Help Center</a>
+                    <a href="#">API</a>
+                </div>
+                <div class="link-group">
+                    <h4>Legal</h4>
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; <span id="currentYear"></span> Sanguis Blood Management System. All rights reserved.</p>
+            <div class="social-links">
+                <a href="#"><i class="ph-fill ph-twitter-logo"></i></a>
+                <a href="#"><i class="ph-fill ph-linkedin-logo"></i></a>
+                <a href="#"><i class="ph-fill ph-instagram-logo"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modals (Hidden by default) -->
+    <!-- Login Modal -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal glass-panel login-modal">
+            <button class="close-modal"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h3>Login to Sanguis</h3>
+                <p>Sign in to access your blood management account.</p>
+            </div>
+            <form class="modal-form" id="loginForm">
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <input type="email" required class="form-input" placeholder="your@email.com">
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" required class="form-input" placeholder="••••••••">
+                </div>
+                <div class="form-row" style="justify-content: space-between; align-items: center;">
+                    <label class="checkbox-label">
+                        <input type="checkbox"> Remember me
+                    </label>
+                    <a href="#" class="text-link">Forgot password?</a>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block mt-4">Login</button>
+
+                <div class="divider">
+                    <span>Or continue with</span>
+                </div>
+
+                <div class="social-login">
+                    <button type="button" class="btn btn-social" title="Login with Google">
+                        <i class="ph ph-envelope"></i>
+                    </button>
+                    <button type="button" class="btn btn-social" title="Login with Apple">
+                        <i class="ph ph-apple-logo"></i>
+                    </button>
+                    <button type="button" class="btn btn-social" title="Login with Microsoft">
+                        <i class="ph ph-windows-logo"></i>
+                    </button>
+                </div>
+
+                <p class="signup-link mt-4">
+                    Don't have an account? <a href="#" class="text-link font-semibold">Sign up here</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Request Modal -->
+    <div class="modal-overlay" id="requestModal">
+        <div class="modal glass-panel">
+            <button class="close-modal"><i class="ph ph-x"></i></button>
+            <div class="modal-header">
+                <h3>Request Blood</h3>
+                <p>Submit an urgent or scheduled blood requirement.</p>
+            </div>
+            <form class="modal-form" id="requestBloodForm">
+                <div class="input-group">
+                    <label>Patient Name / Hospital ID</label>
+                    <input type="text" required class="form-input">
+                </div>
+                <div class="form-row">
+                    <div class="input-group">
+                        <label>Blood Group Needed</label>
+                        <select required class="form-input">
+                            <option value="" disabled selected>Select...</option>
+                            <option value="A+">A+</option>
+                            <option value="O-">O-</option>
+                            <!-- other options... -->
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Units Required</label>
+                        <input type="number" min="1" max="10" required class="form-input" placeholder="e.g. 2">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Urgency Level</label>
+                    <div class="radio-group">
+                        <label class="radio-label"><input type="radio" name="urgency" value="normal" checked>
+                            Normal</label>
+                        <label class="radio-label urgency-high"><input type="radio" name="urgency" value="critical">
+                            Critical/Emergency</label>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block mt-4">Submit Request</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Emergency Home Popup -->
+    <div id="emergencyPopup" class="emergency-popup">
+        <div class="emergency-popup-content">
+            <button class="popup-close" onclick="closeEmergencyPopup()"><i class="ph ph-x"></i></button>
+            <div style="font-size: 4rem; color: #ff3b30; margin-bottom: 1rem;">
+                <i class="ph-fill ph-warning-circle"></i>
+            </div>
+            <h1
+                style="font-size: 3rem; color: #ff3b30; font-weight: 800; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 2px;">
+                Urgent Blood Required</h1>
+            <h2 style="font-size: 2.5rem; color: white; margin-bottom: 2rem;" id="popupPatientGroup">Type O-</h2>
+            <div class="emergency-meta"
+                style="display: flex; justify-content: space-around; font-size: 1.2rem; color: var(--text-muted);">
+                <div><i class="ph-fill ph-user"></i> <span id="popupPatientName">John Doe</span></div>
+                <div><i class="ph-fill ph-map-pin"></i> <span id="popupPatientLocation">New York</span></div>
+                <div><i class="ph-fill ph-heartbeat"></i> <span id="popupPatientLevel">Critical</span> Patient</div>
+            </div>
+            <button class="btn btn-primary mt-4"
+                style="background:#ff3b30; font-size:1.2rem; padding: 1rem 3rem; margin-top:2rem;"
+                onclick="closeEmergencyPopup()">Acknowledge & Respond</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <div class="pager" aria-hidden="false">
+        <button id="prevSection" class="pager-button" aria-label="Previous section">Prev</button>
+        <button id="nextSection" class="pager-button" aria-label="Next section">Next</button>
+    </div>
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load requests, clean old ones
+            let requestsDB = JSON.parse(localStorage.getItem('sanguis_requests')) || [];
+            const now = new Date();
+
+            // Filter > 24 hours
+            const activeRequests = requestsDB.filter(r => {
+                const reqTime = new Date(r.time);
+                const diffTime = Math.abs(now - reqTime);
+                const diffHrs = diffTime / (1000 * 60 * 60);
+                return diffHrs < 24;
+            });
+
+            // Update storage to clear out expired natively
+            if (activeRequests.length !== requestsDB.length) {
+                localStorage.setItem('sanguis_requests', JSON.stringify(activeRequests));
+            }
+
+            // Render to Home Page Tracker
+            const homeContainer = document.getElementById('homeRequestsContainer');
+            const emergencyContainer = document.getElementById('emergencyRequestsContainer');
+
+            if (activeRequests.length > 0) {
+                let homeHTML = '';
+                let emergencyHTML = '';
+
+                // Sort by time (newest first)
+                activeRequests.sort((a, b) => new Date(b.time) - new Date(a.time));
+
+                activeRequests.forEach((req, idx) => {
+                    const reqDate = new Date(req.time);
+                    const isCritical = req.level === 'Critical';
+                    const levelColor = isCritical ? '#ff3b30' : (req.level === 'Medium' ? '#ff9800' : '#4caf50');
+
+                    // Populate top tracker (max 3 items)
+                    if (idx < 3) {
+                        homeHTML += `
+                        <div class="tracking-card mt-3" style="border-left: 3px solid ${levelColor};">
+                            <div class="blood-type-badge" style="background: rgba(0,0,0,0.3); color: var(--text-main); font-size:1rem;">${req.group}</div>
+                            <div class="tracking-info">
+                                <h4 style="color: ${levelColor}; font-size: 0.9rem;">${req.level} Level Request</h4>
+                                <p>${req.location}</p>
+                            </div>
+                        </div>`;
+                    }
+
+                    // Populate Emergency Section
+                    emergencyHTML += `
+                    <div class="inventory-card glass-panel" style="position:relative; overflow:hidden;">
+                        <div style="position:absolute; top:0; left:0; width:4px; height:100%; background:${levelColor};"></div>
+                        <div class="hospital-header">
+                            <div>
+                                <h3 style="margin-bottom:0.2rem;">${req.name}</h3>
+                                <p style="font-size:0.8rem; color:${levelColor};"><i class="ph-fill ph-warning-circle"></i> Requires ${req.group} Blood</p>
+                            </div>
+                            <div class="blood-type-badge" style="background: rgba(255,255,255,0.1); border:none; width:45px; height:45px;">${req.group}</div>
+                        </div>
+                        <div style="margin-top:1rem; display:flex; flex-direction:column; gap:0.5rem; font-size:0.9rem; color:var(--text-muted);">
+                            <div style="display:flex; align-items:center; gap:0.5rem;"><i class="ph-fill ph-map-pin" style="color:var(--text-main);"></i> ${req.location}</div>
+                            <div style="display:flex; align-items:center; gap:0.5rem;"><i class="ph-fill ph-clock" style="color:var(--text-main);"></i> Listed: ${reqDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                            <div style="display:flex; align-items:center; gap:0.5rem;"><i class="ph-fill ph-heartbeat" style="color:var(--text-main);"></i> Severity: <strong style="color:${levelColor};">${req.level}</strong></div>
+                        </div>
+                    </div>`;
+                });
+
+                homeContainer.innerHTML = homeHTML;
+                emergencyContainer.innerHTML = emergencyHTML;
+
+                // Trigger Popup Logic for newest request
+                const latestReq = activeRequests[0];
+                const popupId = sessionStorage.getItem('last_popup_request_id');
+
+                if (latestReq && latestReq.level !== 'Normal' && latestReq.id.toString() !== popupId) {
+                    document.getElementById('popupPatientGroup').textContent = `Type ${latestReq.group}`;
+                    document.getElementById('popupPatientName').textContent = latestReq.name;
+                    document.getElementById('popupPatientLocation').textContent = latestReq.location;
+                    document.getElementById('popupPatientLevel').textContent = latestReq.level;
+
+                    // Show nicely after the page loads completely
+                    setTimeout(() => {
+                        document.getElementById('emergencyPopup').classList.add('show');
+                    }, 800);
+
+                    // Auto close timer
+                    setTimeout(() => {
+                        closeEmergencyPopup();
+                    }, 12000); // 12-second display duration
+
+                    sessionStorage.setItem('last_popup_request_id', latestReq.id.toString());
+                }
+
+            } else {
+                emergencyContainer.innerHTML = `
+                <div class="glass-panel" style="grid-column: 1 / -1; text-align:center; padding: 3rem;">
+                    <i class="ph ph-check-circle" style="font-size:3rem; color:#4caf50; margin-bottom:1rem;"></i>
+                    <h3 style="color:var(--text-muted);">No Active Emergencies</h3>
+                    <p style="font-size:0.9rem; margin-top:0.5rem;">All patient requests have been fulfilled or resolved.</p>
+                </div>`;
+            }
+        });
+
+        function closeEmergencyPopup() {
+            const popup = document.getElementById('emergencyPopup');
+            if (popup) {
+                popup.classList.remove('show');
+            }
+        }
+    </script>
+</body>
+
+</html>

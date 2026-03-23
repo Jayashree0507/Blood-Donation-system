@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sanguis - Login</title>
+    <meta name="description" content="Sign in to your Sanguis blood management account.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="index.css">
+    
+    <!-- Icons (Phosphor Icons) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <style>
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            max-width: 1200px;
+            width: 100%;
+            align-items: center;
+        }
+
+        .login-card {
+            max-width: 450px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            padding: 3rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .login-form-header {
+            margin-bottom: 2.5rem;
+            text-align: center;
+        }
+
+        .login-form-header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), #ff7a8a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .login-form-header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .form-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-section label {
+            display: block;
+            margin-bottom: 0.6rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .form-section input,
+        .form-section select {
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            padding: 0.9rem 1.1rem;
+            color: var(--text-main);
+            font-family: var(--font-body);
+            font-size: 1rem;
+            outline: none;
+            transition: var(--transition-smooth);
+        }
+
+        .form-section input:focus,
+        .form-section select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(248, 50, 78, 0.2);
+        }
+
+        .remember-forgot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            font-size: 0.85rem;
+        }
+
+        .remember-forgot a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: var(--transition-smooth);
+        }
+
+        .remember-forgot a:hover {
+            color: #ff7a8a;
+            text-decoration: underline;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: var(--transition-smooth);
+        }
+
+        .login-btn:hover:not(:disabled) {
+            background-color: #d8213a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--primary-glow);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .social-divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 2rem 0;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .social-divider line {
+            flex: 1;
+            height: 1px;
+            background: var(--border-glass);
+        }
+
+        .social-divider::before,
+        .social-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-glass);
+        }
+
+        .social-buttons {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .social-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-glass);
+            color: var(--text-main);
+            cursor: pointer;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-smooth);
+        }
+
+        .social-btn:hover {
+            background: rgba(248, 50, 78, 0.15);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .signup-text {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .signup-text a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .signup-text a:hover {
+            text-decoration: underline;
+        }
+
+        .login-promo {
+            color: var(--text-muted);
+        }
+
+        .promo-title {
+            font-size: 1.8rem;
+            color: var(--text-main);
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+
+        .promo-list {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .promo-list li {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: flex-start;
+        }
+
+        .promo-list i {
+            color: var(--primary);
+            font-size: 1.3rem;
+            flex-shrink: 0;
+            margin-top: 0.3rem;
+        }
+
+        .promo-list strong {
+            color: var(--text-main);
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+
+        .brand-footer {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+            color: var(--text-main);
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .brand-footer i {
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .login-container {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .login-promo {
+                display: none;
+            }
+
+            .login-card {
+                padding: 2rem;
+                max-width: 100%;
+            }
+
+            .login-page {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body class="dark-theme">
+    <div class="blob-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="login-page">
+        <div class="login-container">
+            <!-- Login Form -->
+            <div class="login-card">
+                <div class="login-form-header">
+                    <h1>Welcome Back</h1>
+                    <p>Sign in to your Sanguis account</p>
+                </div>
+
+                <form id="pageLoginForm">
+                    <!-- Email -->
+                    <div class="form-section">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" required placeholder="your@email.com">
+                    </div>
+
+                    <!-- Password -->
+                    <div class="form-section">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" required placeholder="••••••••">
+                    </div>
+
+                    <!-- Remember & Forgot -->
+                    <div class="remember-forgot">
+                        <label style="display: flex; gap: 0.5rem; align-items: center; cursor: pointer;">
+                            <input type="checkbox" style="width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer;">
+                            <span>Remember me</span>
+                        </label>
+                        <a href="#">Forgot password?</a>
+                    </div>
+
+                    <!-- Login Button -->
+                    <button type="submit" class="login-btn">Sign In</button>
+                </form>
+
+                <!-- Social Login -->
+                <div class="social-divider"></div>
+
+                <div class="social-buttons">
+                    <button type="button" class="social-btn" title="Google">
+                        <i class="ph ph-envelope"></i>
+                    </button>
+                    <button type="button" class="social-btn" title="Apple">
+                        <i class="ph ph-apple-logo"></i>
+                    </button>
+                    <button type="button" class="social-btn" title="Microsoft">
+                        <i class="ph ph-windows-logo"></i>
+                    </button>
+                </div>
+
+                <!-- Sign Up Link -->
+                <div class="signup-text">
+                    Don't have an account? <a href="#">Create one</a>
+                </div>
+            </div>
+
+            <!-- Promo Section -->
+            <div class="login-promo">
+                <div class="promo-title">Save Lives Today</div>
+                
+                <ul class="promo-list">
+                    <li>
+                        <i class="ph-fill ph-heartbeat"></i>
+                        <div>
+                            <strong>Find Blood Instantly</strong>
+                            Access real-time inventory from 120+ hospitals and blood banks
+                        </div>
+                    </li>
+                    <li>
+                        <i class="ph-fill ph-users"></i>
+                        <div>
+                            <strong>Connect with Donors</strong>
+                            Join 14,200+ active donors ready to help
+                        </div>
+                    </li>
+                    <li>
+                        <i class="ph-fill ph-lightning"></i>
+                        <div>
+                            <strong>Emergency Support</strong>
+                            Get urgent blood requirements fulfilled within hours
+                        </div>
+                    </li>
+                    <li>
+                        <i class="ph-fill ph-shield-check"></i>
+                        <div>
+                            <strong>Verified & Safe</strong>
+                            All blood is tested and certified by medical professionals
+                        </div>
+                    </li>
+                </ul>
+
+                <div class="brand-footer">
+                    <i class="ph-fill ph-drop"></i>
+                    <span>Sanguis</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const form = document.getElementById("pageLoginForm");
+            
+            if (form) {
+                form.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+                    
+                    const email = document.getElementById("email").value;
+                    const password = document.getElementById("password").value;
+                    const btn = e.target.querySelector('button[type="submit"]');
+                    const originalText = btn.innerHTML;
+                    
+                    btn.innerHTML = `<i class="ph ph-spinner-gap ph-spin"></i> Signing in...`;
+                    btn.disabled = true;
+
+                    // Simulate API call
+                    setTimeout(() => {
+                        btn.innerHTML = `<i class="ph ph-check-circle"></i> Login Successful!`;
+                        btn.style.backgroundColor = "#4caf50";
+                        btn.style.boxShadow = "0 4px 15px rgba(76, 175, 80, 0.4)";
+
+                        // Store user data
+                        localStorage.setItem('sanguis_user', JSON.stringify({ 
+                            email: email, 
+                            loginTime: new Date().toISOString(),
+                            role: "user"
+                        }));
+
+                        // Redirect after short delay
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 1000);
+                    }, 900);
+                });
+            }
+
+            // Check if already logged in
+            const savedUser = localStorage.getItem('sanguis_user');
+            if (savedUser) {
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>

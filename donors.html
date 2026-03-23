@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BloodBee - Donor Management</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="index.css">
+
+    <!-- Icons (Phosphor Icons) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        .donor-section {
+            min-height: 100vh;
+            padding: 8rem 2rem 4rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .role-simulator {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            padding: 1rem 1.5rem;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .role-simulator select {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-glass);
+            color: var(--text-main);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            outline: none;
+            font-family: var(--font-body);
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+        }
+
+        th,
+        td {
+            padding: 1.2rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-glass);
+        }
+
+        th {
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr {
+            transition: var(--transition-smooth);
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .status-eligible {
+            background: rgba(76, 175, 80, 0.15);
+            color: #4caf50;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .status-not-eligible {
+            background: rgba(255, 59, 48, 0.15);
+            color: #ff3b30;
+            border: 1px solid rgba(255, 59, 48, 0.3);
+        }
+
+        .action-btn {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-glass);
+            color: var(--text-main);
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .action-btn:hover:not(:disabled) {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+        }
+
+        .action-btn.save-btn {
+            background: rgba(76, 175, 80, 0.2);
+            border-color: #4caf50;
+            color: #4caf50;
+        }
+
+        .action-btn.save-btn:hover:not(:disabled) {
+            background: #4caf50;
+            color: #fff;
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .editable-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--primary);
+            color: var(--text-main);
+            padding: 0.5rem;
+            border-radius: 6px;
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .editable-input:focus {
+            box-shadow: 0 0 0 2px rgba(248, 50, 78, 0.2);
+        }
+    </style>
+</head>
+
+<body class="dark-theme">
+    <div class="blob-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="brand">
+                <i class="ph-fill ph-drop text-primary"></i>
+                <span>BloodBee</span>
+            </a>
+
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="register.html" class="nav-link">Register</a>
+                <a href="donors.html" class="nav-link active">Donor</a>
+                <a href="index.html#emergency" class="nav-link">Emergency</a>
+                <a href="inventory.html" class="nav-link">Inventory</a>
+            </div>
+
+            <div class="nav-actions">
+                <button class="btn btn-outline" onclick="window.location.href='index.html'">Login</button>
+            </div>
+
+            <button class="mobile-toggle" id="mobileToggle">
+                <i class="ph ph-list"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Donor Management Section -->
+    <main>
+        <section class="donor-section">
+            <div class="header-controls">
+                <div>
+                    <h2 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Donor <span
+                            class="gradient-text">Management</span></h2>
+                    <p style="color: var(--text-muted);">View, maintain and manage eligible donors efficiently.</p>
+                </div>
+
+                <!-- Role Simulator to demonstrate RBAC (Role-Based Access Control) -->
+                <div class="role-simulator">
+                    <div>
+                        <i class="ph-fill ph-user-switch" style="font-size: 1.5rem; color: var(--primary);"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.2rem;">Simulate Login
+                            Access</div>
+                        <select id="currentUserRole" onchange="renderTable()">
+                            <option value="ADMIN">System Administrator</option>
+                            <!-- Dynamically populated -->
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Donor Name</th>
+                            <th>Phone Number</th>
+                            <th>Blood Group</th>
+                            <th>Location</th>
+                            <th>Last Donation</th>
+                            <th>Status & Eligibility</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="donorTableBody">
+                        <!-- Rows populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Database Simulation using localStorage or default mock data
+        const ELIGIBILITY_DAYS = 90; // Donors are eligible after 90 days of last donation
+
+        let donorsDB = JSON.parse(localStorage.getItem('sanguis_donors')) || [];
+
+        let editingId = null;
+
+        /**
+         * Calculate if a donor is eligible based on their last donation date.
+         */
+        function checkEligibility(dateString) {
+            if (!dateString) return { eligible: true, text: "Eligible (No History)" };
+            const lastDate = new Date(dateString);
+            const today = new Date();
+            const diffTime = Math.abs(today - lastDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays >= ELIGIBILITY_DAYS) {
+                return { eligible: true, text: `Eligible` };
+            } else {
+                return { eligible: false, text: `Not Eligible (${ELIGIBILITY_DAYS - diffDays} days left)` };
+            }
+        }
+
+        /**
+         * Render the table, with Role-Based Access controls
+         */
+        function renderTable() {
+            const currentRole = document.getElementById('currentUserRole').value;
+            const tbody = document.getElementById('donorTableBody');
+            tbody.innerHTML = '';
+
+            donorsDB.forEach(donor => {
+                const tr = document.createElement('tr');
+                const isEditing = editingId === donor.id;
+
+                // Determine RBAC permissions
+                // Admin can edit all. Donors can only edit their own ID.
+                const canEdit = currentRole === 'ADMIN' || currentRole == donor.id;
+
+                const eligibility = checkEligibility(donor.lastDonation);
+                const statusHTML = eligibility.eligible
+                    ? `<span class="status-badge status-eligible"><i class="ph-fill ph-check-circle"></i> ${eligibility.text}</span>`
+                    : `<span class="status-badge status-not-eligible"><i class="ph-fill ph-x-circle"></i> ${eligibility.text}</span>`;
+
+                if (isEditing) {
+                    // Editable Row
+                    tr.innerHTML = `
+                        <td><input type="text" class="editable-input" id="edit_name_${donor.id}" value="${donor.name}" /></td>
+                        <td><input type="text" class="editable-input" id="edit_phone_${donor.id}" value="${donor.phone}" /></td>
+                        <td>
+                            <select class="editable-input" id="edit_group_${donor.id}">
+                                ${['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'].map(g => `<option value="${g}" ${g === donor.group ? 'selected' : ''}>${g}</option>`).join('')}
+                            </select>
+                        </td>
+                        <td><input type="text" class="editable-input" id="edit_loc_${donor.id}" value="${donor.location}" /></td>
+                        <td><input type="date" class="editable-input" id="edit_date_${donor.id}" value="${donor.lastDonation}" /></td>
+                        <td>${statusHTML}</td>
+                        <td>
+                            <button class="action-btn save-btn" title="Save" onclick="saveRow(${donor.id})"><i class="ph ph-floppy-disk"></i></button>
+                            <button class="action-btn" title="Cancel" onclick="cancelEdit()"><i class="ph ph-x"></i></button>
+                        </td>
+                    `;
+                } else {
+                    // Read-only Row
+                    tr.innerHTML = `
+                        <td style="font-weight: 500;">${donor.name}</td>
+                        <td>${donor.phone}</td>
+                        <td><div class="blood-type-badge type-${donor.group.toLowerCase().replace('+', '').replace('-', '')}" style="width:36px; height:36px; font-size:0.9rem;">${donor.group}</div></td>
+                        <td>${donor.location}</td>
+                        <td>${donor.lastDonation || 'N/A'}</td>
+                        <td>${statusHTML}</td>
+                        <td>
+                            <button class="action-btn" title="Edit" ${!canEdit ? 'disabled' : ''} onclick="editRow(${donor.id})">
+                                <i class="ph ph-pencil-simple"></i>
+                            </button>
+                        </td>
+                    `;
+                }
+                tbody.appendChild(tr);
+            });
+
+            // Re-apply specific blood type styles just in case
+            applyBloodTypeBadgeStyles();
+        }
+
+        function renderRoles() {
+            const roleSelect = document.getElementById('currentUserRole');
+            const currentVal = roleSelect.value;
+
+            roleSelect.innerHTML = '<option value="ADMIN">System Administrator</option>';
+            donorsDB.forEach(donor => {
+                const opt = document.createElement('option');
+                opt.value = donor.id;
+                opt.textContent = `Login as: ${donor.name} (Donor)`;
+                roleSelect.appendChild(opt);
+            });
+
+            // Restore selection if still exists
+            if ([...roleSelect.options].some(o => o.value == currentVal)) {
+                roleSelect.value = currentVal;
+            }
+        }
+
+        function editRow(id) {
+            editingId = id;
+            renderTable();
+        }
+
+        function cancelEdit() {
+            editingId = null;
+            renderTable();
+        }
+
+        function saveRow(id) {
+            const name = document.getElementById(`edit_name_${id}`).value.trim();
+            const phone = document.getElementById(`edit_phone_${id}`).value.trim();
+            const group = document.getElementById(`edit_group_${id}`).value;
+            const location = document.getElementById(`edit_loc_${id}`).value.trim();
+            const date = document.getElementById(`edit_date_${id}`).value;
+
+            if (!name || !phone || !group || !location) {
+                alert('Please fill out all fields securely before saving.');
+                return;
+            }
+
+            // Sync with DB
+            const donorIndex = donorsDB.findIndex(d => d.id === id);
+            if (donorIndex !== -1) {
+                donorsDB[donorIndex] = { ...donorsDB[donorIndex], name, phone, group, location, lastDonation: date };
+                localStorage.setItem('sanguis_donors', JSON.stringify(donorsDB));
+            }
+
+            editingId = null;
+            renderTable();
+        }
+
+        function applyBloodTypeBadgeStyles() {
+            document.querySelectorAll('.blood-type-badge').forEach(badge => {
+                if (!badge.classList.contains('type-ab') && !badge.classList.contains('type-o')) {
+                    // Check if it's A or B to apply relevant styles if they exist in CSS
+                    if (badge.innerText.includes('A') && !badge.innerText.includes('B')) {
+                        badge.style.background = 'rgba(33, 150, 243, 0.15)';
+                        badge.style.color = 'var(--type-a, #2196f3)';
+                        badge.style.borderColor = 'rgba(33, 150, 243, 0.3)';
+                    } else if (badge.innerText.includes('B') && !badge.innerText.includes('A')) {
+                        badge.style.background = 'rgba(255, 152, 0, 0.15)';
+                        badge.style.color = 'var(--type-b, #ff9800)';
+                        badge.style.borderColor = 'rgba(255, 152, 0, 0.3)';
+                    }
+                }
+            });
+        }
+
+        // Initialize Table & Roles
+        renderRoles();
+        renderTable();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BloodBee - Register</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="index.css">
+
+    <!-- Icons (Phosphor Icons) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        .register-section {
+            min-height: 100vh;
+            padding: 8rem 2rem 4rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .register-container {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 0;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(15px);
+            width: 100%;
+        }
+
+        .register-info {
+            padding: 4rem 3rem;
+            background: linear-gradient(135deg, rgba(248, 50, 78, 0.1), rgba(10, 10, 12, 0.8));
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .register-info::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('https://images.unsplash.com/photo-1615461066841-6116e61058f4?q=80&w=800&auto=format&fit=crop') center/cover;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .info-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-content p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        .feature-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .feature-item i {
+            font-size: 1.5rem;
+            color: var(--primary);
+            background: rgba(248, 50, 78, 0.1);
+            padding: 0.8rem;
+            border-radius: 12px;
+        }
+
+        .register-form-wrap {
+            padding: 4rem 3rem;
+            background: var(--bg-secondary);
+            position: relative;
+            z-index: 1;
+        }
+
+        .register-form-wrap h3 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .register-form-wrap .subtitle {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+        }
+
+        .form-grid.full-width {
+            grid-template-columns: 1fr;
+        }
+
+        .role-selector {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .role-btn {
+            flex: 1;
+            padding: 0.8rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            color: var(--text-main);
+            font-family: var(--font-body);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .role-btn i {
+            font-size: 1.5rem;
+        }
+
+        .role-btn.active {
+            background: rgba(248, 50, 78, 0.15);
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(248, 50, 78, 0.2);
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .location-group {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        .location-inputs {
+            display: flex;
+            gap: 0.5rem;
+            flex: 1;
+        }
+
+        .location-inputs input {
+            background: rgba(0, 0, 0, 0.1);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        .btn-location {
+            height: 47px;
+            white-space: nowrap;
+        }
+
+        .otp-group {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        .btn-otp {
+            height: 47px;
+            white-space: nowrap;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2.5rem;
+            justify-content: flex-end;
+        }
+
+        @media (max-width: 900px) {
+            .register-container {
+                grid-template-columns: 1fr;
+            }
+
+            .register-info {
+                padding: 3rem 2rem;
+            }
+
+            .register-form-wrap {
+                padding: 3rem 2rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .location-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .otp-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+
+<body class="dark-theme">
+    <div class="blob-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="brand">
+                <i class="ph-fill ph-drop text-primary"></i>
+                <span>BloodBee</span>
+            </a>
+
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="register.html" class="nav-link active">Register</a>
+                <a href="donors.html" class="nav-link">Donor</a>
+                <a href="index.html#emergency" class="nav-link">Emergency</a>
+                <a href="inventory.html" class="nav-link">Inventory</a>
+            </div>
+
+            <div class="nav-actions">
+                <button class="btn btn-outline" onclick="window.location.href='index.html'">Login</button>
+            </div>
+
+            <button class="mobile-toggle" id="mobileToggle">
+                <i class="ph ph-list"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Register Section -->
+    <main>
+        <section class="register-section">
+            <div class="register-container">
+                <!-- Info Section -->
+                <div class="register-info">
+                    <div class="info-content">
+                        <h2>Join the <span class="gradient-text">Lifeline.</span></h2>
+                        <p>Create an account to donate blood, request for emergencies, or manage the system. Every
+                            connection made here has the potential to save a life.</p>
+
+                        <ul class="feature-list">
+                            <li class="feature-item">
+                                <i class="ph-fill ph-shield-check"></i>
+                                <div>
+                                    <h4>Secure & Private</h4>
+                                    <p style="font-size:0.9rem; margin-bottom:0; color:var(--text-muted);">Your health
+                                        data is encrypted and secure.</p>
+                                </div>
+                            </li>
+                            <li class="feature-item">
+                                <i class="ph-fill ph-map-pin"></i>
+                                <div>
+                                    <h4>Live Tracking</h4>
+                                    <p style="font-size:0.9rem; margin-bottom:0; color:var(--text-muted);">Real-time GPS
+                                        mapping for immediate emergencies.</p>
+                                </div>
+                            </li>
+                            <li class="feature-item">
+                                <i class="ph-fill ph-clock"></i>
+                                <div>
+                                    <h4>Fast Verification</h4>
+                                    <p style="font-size:0.9rem; margin-bottom:0; color:var(--text-muted);">OTP-based
+                                        seamless user authentication.</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Form Section -->
+                <div class="register-form-wrap glass-panel">
+                    <h3>Create Account</h3>
+                    <p class="subtitle">Complete your profile to get started.</p>
+
+                    <form id="registerForm" onsubmit="handleRegister(event)">
+
+                        <!-- Role Selection -->
+                        <div class="input-group">
+                            <label>Select Your Role</label>
+                            <div class="role-selector">
+                                <button type="button" class="role-btn active" onclick="setRole('donor', this)">
+                                    <i class="ph ph-heartbeat"></i>
+                                    Donor
+                                </button>
+                                <button type="button" class="role-btn" onclick="setRole('patient', this)">
+                                    <i class="ph ph-bed"></i>
+                                    Patient
+                                </button>
+                                <button type="button" class="role-btn" onclick="setRole('admin', this)">
+                                    <i class="ph ph-shield-star"></i>
+                                    Admin
+                                </button>
+                            </div>
+                            <input type="hidden" id="userRole" value="donor" required>
+                        </div>
+
+                        <div class="form-grid">
+                            <!-- Full Name -->
+                            <div class="input-group">
+                                <label>Full Name</label>
+                                <input type="text" id="fullName" class="form-input" placeholder="John Doe" required>
+                            </div>
+
+                            <!-- Blood Group -->
+                            <div class="input-group">
+                                <label>Blood Group</label>
+                                <select id="bloodGroup" class="form-input" required>
+                                    <option value="" disabled selected>Select...</option>
+                                    <option value="A+">A+</option>
+                                    <option value="A-">A−</option>
+                                    <option value="B+">B+</option>
+                                    <option value="B-">B−</option>
+                                    <option value="O+">O+</option>
+                                    <option value="O-">O−</option>
+                                    <option value="AB+">AB+</option>
+                                    <option value="AB-">AB−</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Field: Last Donation Date OR Critical Level -->
+                        <div class="form-grid full-width mt-3">
+                            <div class="input-group" id="donorFieldGroup">
+                                <label>Last Donation Date</label>
+                                <input type="date" id="lastDonation" class="form-input">
+                            </div>
+                            <div class="input-group" id="patientFieldGroup" style="display:none;">
+                                <label>Emergency Critical Level</label>
+                                <select id="criticalLevel" class="form-input">
+                                    <option value="" disabled selected>Select level...</option>
+                                    <option value="Normal">Normal</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Critical">Critical</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Phone Number & OTP -->
+                        <div class="form-grid full-width mt-3">
+                            <div class="input-group">
+                                <label>Phone Number</label>
+                                <div class="otp-group">
+                                    <input type="tel" id="phoneNumber" class="form-input" placeholder="+1 234 567 8900"
+                                        required pattern="[\+]?[0-9\s\-]+">
+                                    <button type="button" class="btn btn-outline btn-otp" onclick="sendOTP()">Send
+                                        OTP</button>
+                                </div>
+                            </div>
+
+                            <div class="input-group" id="otpContainer" style="display:none; transition: all 0.3s;">
+                                <label>OTP Verification</label>
+                                <input type="text" id="otpInput" class="form-input" placeholder="Enter 6-digit OTP"
+                                    maxlength="6">
+                            </div>
+
+                            <div class="input-group">
+                                <label>Password</label>
+                                <input type="password" id="password" class="form-input" placeholder="••••••••" required
+                                    minlength="8">
+                            </div>
+                        </div>
+
+                        <!-- Location Tracking -->
+                        <div class="form-grid full-width mt-3">
+                            <div class="input-group">
+                                <label>Location for tracking</label>
+                                <div class="location-group">
+                                    <div class="location-inputs">
+                                        <input type="text" id="latitude" class="form-input" placeholder="Latitude"
+                                            readonly required>
+                                        <input type="text" id="longitude" class="form-input" placeholder="Longitude"
+                                            readonly required>
+                                    </div>
+                                    <button type="button" class="btn btn-outline btn-location"
+                                        onclick="getLocation(this)">
+                                        <i class="ph ph-crosshair"></i> Track My Location
+                                    </button>
+                                </div>
+                                <small id="locationStatus" class="text-muted"
+                                    style="display:block; margin-top:5px; font-size:0.8rem;"></small>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary" id="registerBtn">Register</button>
+                            <button type="button" class="btn btn-glass" id="continueBtn" style="display:none;"
+                                onclick="handleContinue()">Continue <i class="ph ph-arrow-right"></i></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        function setRole(role, element) {
+            document.getElementById('userRole').value = role;
+            document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+
+            // Toggle form fields based on role
+            if (role === 'patient') {
+                document.getElementById('donorFieldGroup').style.display = 'none';
+                document.getElementById('patientFieldGroup').style.display = 'block';
+            } else if (role === 'donor') {
+                document.getElementById('donorFieldGroup').style.display = 'block';
+                document.getElementById('patientFieldGroup').style.display = 'none';
+            } else {
+                // Admin might not need either, but keep it simple or hide both
+                document.getElementById('donorFieldGroup').style.display = 'none';
+                document.getElementById('patientFieldGroup').style.display = 'none';
+            }
+        }
+
+        function sendOTP() {
+            const phone = document.getElementById('phoneNumber').value;
+            if (!phone) {
+                alert("Please enter a phone number first.");
+                return;
+            }
+
+            // Generate unique 6-digit OTP
+            const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+            // 5 minutes validity
+            const expiryTime = new Date().getTime() + 5 * 60000;
+
+            sessionStorage.setItem('temp_otp', generatedOtp);
+            sessionStorage.setItem('temp_otp_expiry', expiryTime);
+
+            alert(`[SIMULATION] Your secure OTP is: ${generatedOtp}\n\n(Expires in 5 minutes)`);
+            document.getElementById('otpContainer').style.display = "block";
+            document.getElementById('otpInput').value = "";
+            document.getElementById('otpInput').focus();
+        }
+
+        function getLocation(btn) {
+            const status = document.getElementById('locationStatus');
+            const latInput = document.getElementById('latitude');
+            const lngInput = document.getElementById('longitude');
+
+            status.textContent = "Locating via GPS...";
+            btn.innerHTML = `<i class="ph ph-spinner ph-spin"></i> Tracking...`;
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+
+                        try {
+                            status.textContent = "Translating coordinates to area name...";
+                            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=14&addressdetails=1`);
+                            const data = await response.json();
+
+                            let areaName = "Unknown Area";
+                            if (data && data.address) {
+                                const city = data.address.city || data.address.town || data.address.village || data.address.county || "";
+                                const suburb = data.address.suburb || data.address.neighbourhood || data.address.residential || "";
+                                areaName = [suburb, city].filter(Boolean).join(", ");
+                                if (!areaName) areaName = data.display_name.split(",").slice(0, 2).join(",");
+                            }
+
+                            // Use the first input for the human readable string
+                            latInput.value = areaName;
+                            latInput.readOnly = false; // Allow user to edit if needed
+                            lngInput.style.display = 'none'; // Hide the second input
+
+                            status.textContent = "Location identified successfully.";
+                            status.style.color = "#4caf50";
+                            btn.innerHTML = `<i class="ph ph-check"></i> Tracked`;
+                            btn.classList.add('logged-in'); // Appears solid green
+                        } catch (err) {
+                            // Fallback if API fails
+                            latInput.value = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                            lngInput.style.display = 'none';
+                            status.textContent = "Coordinates used (Geocoding API failed).";
+                            btn.innerHTML = `<i class="ph ph-check"></i> Tracked`;
+                        }
+                    },
+                    (error) => {
+                        let msg = "";
+                        switch (error.code) {
+                            case error.PERMISSION_DENIED: msg = "User denied Geolocation."; break;
+                            case error.POSITION_UNAVAILABLE: msg = "Location unavailable."; break;
+                            case error.TIMEOUT: msg = "Request timed out."; break;
+                            default: msg = "Unknown error occurred."; break;
+                        }
+                        status.textContent = msg;
+                        status.style.color = "#ff3b30";
+                        btn.innerHTML = `<i class="ph ph-crosshair"></i> Retry`;
+                    }
+                );
+            } else {
+                status.textContent = "Geolocation is not supported by this browser.";
+                status.style.color = "#ff3b30";
+            }
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+
+            // Validate OTP
+            const otpContainer = document.getElementById('otpContainer');
+            if (otpContainer.style.display !== "none") {
+                const otp = document.getElementById('otpInput').value;
+                const savedOtp = sessionStorage.getItem('temp_otp');
+                const expiry = parseInt(sessionStorage.getItem('temp_otp_expiry')) || 0;
+
+                if (!otp || otp !== savedOtp) {
+                    alert("Invalid OTP verification code.");
+                    return;
+                }
+
+                if (new Date().getTime() > expiry) {
+                    alert("OTP has expired. Please request a new one.");
+                    return;
+                }
+            } else {
+                alert("Please verify your phone number via OTP.");
+                return;
+            }
+
+            // Check location validation
+            const locationName = document.getElementById('latitude').value;
+            if (!locationName) {
+                alert("Please track your location via GPS before registering. Location is critical for emergency responses.");
+                return;
+            }
+
+            // Save details dynamically based on user role
+            const role = document.getElementById('userRole').value;
+            const name = document.getElementById('fullName').value;
+            const phone = document.getElementById('phoneNumber').value;
+            const group = document.getElementById('bloodGroup').value;
+
+            if (role === 'donor') {
+                const lastDonation = document.getElementById('lastDonation').value;
+                let donorsDB = JSON.parse(localStorage.getItem('sanguis_donors')) || [];
+                const newId = donorsDB.length > 0 ? Math.max(...donorsDB.map(d => d.id)) + 1 : 1;
+                const newDonor = { id: newId, name, phone, group, location: locationName, lastDonation };
+                donorsDB.push(newDonor);
+                localStorage.setItem('sanguis_donors', JSON.stringify(donorsDB));
+            } else if (role === 'patient') {
+                const criticalLevel = document.getElementById('criticalLevel').value;
+                if (!criticalLevel) {
+                    alert("Please select an Emergency Critical Level.");
+                    return;
+                }
+                let requestsDB = JSON.parse(localStorage.getItem('sanguis_requests')) || [];
+                const newId = requestsDB.length > 0 ? Math.max(...requestsDB.map(r => r.id)) + 1 : 1;
+                const newRequest = {
+                    id: newId,
+                    name,
+                    group,
+                    level: criticalLevel,
+                    location: locationName,
+                    time: new Date().toISOString()
+                };
+                requestsDB.push(newRequest);
+                localStorage.setItem('sanguis_requests', JSON.stringify(requestsDB)); // Request saved
+            }
+
+            // Client-side visual validation
+            const btn = document.getElementById('registerBtn');
+            btn.innerHTML = `<i class="ph ph-spinner ph-spin"></i> Saving...`;
+            btn.disabled = true;
+
+            // Simulate API request/save
+            setTimeout(() => {
+                btn.innerHTML = `<i class="ph ph-check"></i> Registered successfully`;
+                btn.classList.add('logged-in'); // green success style
+
+                // Show continue button
+                document.getElementById('continueBtn').style.display = "inline-flex";
+            }, 1000);
+        }
+
+        function handleContinue() {
+            // Navigate to donors dashboard
+            window.location.href = "donors.html";
+        }
+    </script>
+</body>
+
+</html>
