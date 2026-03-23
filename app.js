@@ -81,7 +81,9 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     if (requestBtn) {
-        requestBtn.addEventListener("click", () => openModal(requestModal));
+        requestBtn.addEventListener("click", () => {
+             window.location.href = "request-blood.html";
+        });
     }
 
     if (loginBtn) {
@@ -139,19 +141,42 @@ document.addEventListener("DOMContentLoaded", () => {
     // Handle Login Form Submission (if present)
     const loginForm = document.getElementById("loginForm");
     if (loginForm) {
-        loginForm.addEventListener("submit", (e) => {
+        async function hashPassword(pwd) {
+            const msgBuffer = new TextEncoder().encode(pwd);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        loginForm.addEventListener("submit", async (e) => {
             e.preventDefault();
-            const email = loginForm.querySelector('input[type="email"]').value;
+            const identifierInput = loginForm.querySelector('input[type="email"]') || loginForm.querySelector('input[type="text"]');
+            const identifier = identifierInput ? identifierInput.value : '';
             const password = loginForm.querySelector('input[type="password"]').value;
             const btn = e.target.querySelector('button[type="submit"]');
             const originalText = btn ? btn.innerHTML : "Login";
             
             if (btn) {
-                btn.innerHTML = `<i class="ph ph-spinner-gap ph-spin"></i> Signing in...`;
+                btn.innerHTML = `<i class="ph ph-spinner-gap ph-spin"></i> Verifying...`;
                 btn.disabled = true;
             }
 
-            // Simulate API call to backend
+            const hashedAttempt = await hashPassword(password);
+            const usersDB = JSON.parse(localStorage.getItem('sanguis_users')) || [];
+            
+            const user = usersDB.find(u => u.phone === identifier || u.name === identifier || (u.email && u.email === identifier));
+
+            if (!user || user.password !== hashedAttempt) {
+                setTimeout(() => {
+                    alert("Invalid password. Please enter the correct registered password.");
+                    if (btn) {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    }
+                }, 400);
+                return;
+            }
+
             setTimeout(() => {
                 if (btn) {
                     btn.innerHTML = `<i class="ph ph-check-circle"></i> Login Successful!`;
@@ -161,9 +186,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 // Store login info in localStorage
                 localStorage.setItem('sanguis_user', JSON.stringify({ 
-                    email: email, 
-                    loginTime: new Date().toISOString(),
-                    role: "user"
+                    phone: user.phone,
+                    name: user.name,
+                    role: user.role,
+                    loginTime: new Date().toISOString()
                 }));
 
                 setTimeout(() => {
@@ -174,13 +200,15 @@ document.addEventListener("DOMContentLoaded", () => {
                         btn.disabled = false;
                         btn.style = ""; // Reset inline styles
                     }
-                    // Update navbar to show user is logged in
                     if (loginBtn) {
                         loginBtn.textContent = "Logout";
                         loginBtn.classList.add("logged-in");
                     }
+                    if (user.role === 'donor') window.location.href = "donors.html";
+                    else if (user.role === 'patient') window.location.href = "emergency.html";
+                    else window.location.href = "index.html";
                 }, 1200);
-            }, 900);
+            }, 800);
         });
     }
 

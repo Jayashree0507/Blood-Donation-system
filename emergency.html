@@ -40,10 +40,10 @@
             </a>
 
             <div class="nav-links">
-                <a href="index.html" class="nav-link active">Home</a>
+                <a href="index.html" class="nav-link">Home</a>
                 <a href="register.html" class="nav-link">Register</a>
                 <a href="donors.html" class="nav-link">Donor</a>
-                <a href="emergency.html" class="nav-link">Emergency</a>
+                <a href="emergency.html" class="nav-link active">Emergency</a>
                 <a href="inventory.html" class="nav-link">Inventory</a>
             </div>
 
@@ -60,70 +60,7 @@
 
     <!-- Main Content -->
     <main>
-        <!-- Hero Section -->
-        <section id="home" class="hero-section">
-            <div class="hero-content">
-                <div class="badge">
-                    <span class="pulsing-dot"></span>
-                    Live Urgent Requirements
-                </div>
-                <h1 class="hero-title">Every Drop <br><span class="gradient-text">Counts.</span> Every Life <br>Matters.
-                </h1>
-                <p class="hero-subtitle">Connect directly with blood banks, hospitals, and willing donors near you. A
-                    unified, modern platform for seamless blood management and saving lives.</p>
 
-                <div class="hero-cta">
-                    <button class="btn btn-primary btn-lg"
-                        onclick="document.getElementById('inventory').scrollIntoView({behavior: 'smooth'})">Find Blood<i
-                            class="ph ph-magnifying-glass"></i></button>
-                    <button class="btn btn-glass btn-lg"
-                        onclick="document.getElementById('donate').scrollIntoView({behavior: 'smooth'})">Become a
-                        Donor</button>
-                </div>
-
-                <div class="stats-row">
-                    <div class="stat-card glass-panel">
-                        <i class="ph-fill ph-users"></i>
-                        <div class="stat-info">
-                            <h3>14,200+</h3>
-                            <p>Active Donors</p>
-                        </div>
-                    </div>
-                    <div class="stat-card glass-panel">
-                        <i class="ph-fill ph-heartbeat"></i>
-                        <div class="stat-info">
-                            <h3>8,450+</h3>
-                            <p>Lives Saved</p>
-                        </div>
-                    </div>
-                    <div class="stat-card glass-panel">
-                        <i class="ph-fill ph-buildings"></i>
-                        <div class="stat-info">
-                            <h3>120+</h3>
-                            <p>Partner Hospitals</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="hero-visual">
-                <div class="glass-mockup">
-                    <div class="mockup-header">
-                        <div class="mockup-dots"><span></span><span></span><span></span></div>
-                        <div class="mockup-title">Live Tracking</div>
-                    </div>
-                    <div class="mockup-body" id="homeRequestsContainer">
-                        <div class="tracking-card">
-                            <div class="blood-type-badge" style="background: rgba(255,255,255,0.1); font-size: 1rem;"><i
-                                    class="ph ph-spinner ph-spin"></i></div>
-                            <div class="tracking-info">
-                                <h4>Loading Live Requests...</h4>
-                                <p>System Monitoring</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
 
         <!-- Emergency Section -->
         <section id="emergency" class="inventory-section mt-4" style="min-height: auto; padding-top:4rem;">
@@ -198,8 +135,8 @@
             </div>
             <form class="modal-form" id="loginForm">
                 <div class="input-group">
-                    <label>Phone Number / Username</label>
-                    <input type="text" required class="form-input" placeholder="e.g. +1 234 567 8900">
+                    <label>Email Address</label>
+                    <input type="email" required class="form-input" placeholder="your@email.com">
                 </div>
                 <div class="input-group">
                     <label>Password</label>
@@ -352,8 +289,8 @@
                     </div>`;
                 });
 
-                homeContainer.innerHTML = homeHTML;
-                emergencyContainer.innerHTML = emergencyHTML;
+                if(homeContainer) homeContainer.innerHTML = homeHTML;
+                if(emergencyContainer) emergencyContainer.innerHTML = emergencyHTML;
 
 
 

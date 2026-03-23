@@ -376,6 +376,8 @@
                                     <option value="Medium">Medium</option>
                                     <option value="Critical">Critical</option>
                                 </select>
+                                <label class="mt-3">Required Date</label>
+                                <input type="date" id="requiredDate" class="form-input">
                             </div>
                         </div>
 
@@ -540,8 +542,22 @@
             }
         }
 
-        function handleRegister(e) {
+        async function hashPassword(password) {
+            const msgBuffer = new TextEncoder().encode(password);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function handleRegister(e) {
             e.preventDefault();
+
+            const password = document.getElementById('password').value;
+            const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
+            if (!passwordPattern.test(password)) {
+                alert("Password must be at least 8 characters long and contain both letters and numbers.");
+                return;
+            }
 
             // Validate OTP
             const otpContainer = document.getElementById('otpContainer');
@@ -586,8 +602,13 @@
                 localStorage.setItem('sanguis_donors', JSON.stringify(donorsDB));
             } else if (role === 'patient') {
                 const criticalLevel = document.getElementById('criticalLevel').value;
+                const requiredDate = document.getElementById('requiredDate').value;
                 if (!criticalLevel) {
                     alert("Please select an Emergency Critical Level.");
+                    return;
+                }
+                if (!requiredDate) {
+                    alert("Please properly select a Required Date.");
                     return;
                 }
                 let requestsDB = JSON.parse(localStorage.getItem('sanguis_requests')) || [];
@@ -595,14 +616,25 @@
                 const newRequest = {
                     id: newId,
                     name,
+                    phone,
                     group,
                     level: criticalLevel,
                     location: locationName,
-                    time: new Date().toISOString()
+                    time: requiredDate
                 };
                 requestsDB.push(newRequest);
                 localStorage.setItem('sanguis_requests', JSON.stringify(requestsDB)); // Request saved
             }
+
+            // Secure user storage for Authentication
+            const hashedPassword = await hashPassword(password);
+            let usersDB = JSON.parse(localStorage.getItem('sanguis_users')) || [];
+            if (usersDB.some(u => u.phone === phone || u.name === name)) {
+                alert("Phone number or Username is already registered!");
+                return;
+            }
+            usersDB.push({ name, phone, role, password: hashedPassword });
+            localStorage.setItem('sanguis_users', JSON.stringify(usersDB));
 
             // Client-side visual validation
             const btn = document.getElementById('registerBtn');
