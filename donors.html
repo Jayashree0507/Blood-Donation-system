@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BloodBee - Donor Management</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="index.css">
+
+    <!-- Icons (Phosphor Icons) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        .donor-section {
+            min-height: 100vh;
+            padding: 8rem 2rem 4rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .role-simulator {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            padding: 1rem 1.5rem;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .role-simulator select {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-glass);
+            color: var(--text-main);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            outline: none;
+            font-family: var(--font-body);
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+        }
+
+        th,
+        td {
+            padding: 1.2rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-glass);
+        }
+
+        th {
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr {
+            transition: var(--transition-smooth);
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .status-eligible {
+            background: rgba(76, 175, 80, 0.15);
+            color: #4caf50;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .status-not-eligible {
+            background: rgba(255, 59, 48, 0.15);
+            color: #ff3b30;
+            border: 1px solid rgba(255, 59, 48, 0.3);
+        }
+
+        .action-btn {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-glass);
+            color: var(--text-main);
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .action-btn:hover:not(:disabled) {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+        }
+
+        .action-btn.save-btn {
+            background: rgba(76, 175, 80, 0.2);
+            border-color: #4caf50;
+            color: #4caf50;
+        }
+
+        .action-btn.save-btn:hover:not(:disabled) {
+            background: #4caf50;
+            color: #fff;
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .editable-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--primary);
+            color: var(--text-main);
+            padding: 0.5rem;
+            border-radius: 6px;
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .editable-input:focus {
+            box-shadow: 0 0 0 2px rgba(248, 50, 78, 0.2);
+        }
+    </style>
+</head>
+
+<body class="dark-theme">
+    <div class="blob-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="brand">
+                <i class="ph-fill ph-drop text-primary"></i>
+                <span>BloodBee</span>
+            </a>
+
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="register.html" class="nav-link">Register</a>
+                <a href="donors.html" class="nav-link active">Donor</a>
+                <a href="index.html#emergency" class="nav-link">Emergency</a>
+                <a href="inventory.html" class="nav-link">Inventory</a>
+            </div>
+
+            <div class="nav-actions">
+                <button class="btn btn-outline" onclick="window.location.href='index.html'">Login</button>
+            </div>
+
+            <button class="mobile-toggle" id="mobileToggle">
+                <i class="ph ph-list"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Donor Management Section -->
+    <main>
+        <section class="donor-section">
+            <div class="header-controls">
+                <div>
+                    <h2 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Donor <span
+                            class="gradient-text">Management</span></h2>
+                    <p style="color: var(--text-muted);">View, maintain and manage eligible donors efficiently.</p>
+                </div>
+
+                <div style="flex: 1; min-width: 300px; margin: 0 1rem; position: relative;">
+                    <div style="display: flex; gap: 1rem;">
+                        <div style="position: relative; flex: 2;">
+                            <input type="text" id="locationFilterInput" class="editable-input" placeholder="Enter location name or area to filter donors within 5 km..." style="width: 100%; padding: 0.8rem 1rem 0.8rem 2.5rem; border-radius: 12px; font-size: 0.95rem; background: rgba(0,0,0,0.5);">
+                            <i class="ph ph-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; color: var(--text-muted);"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <select id="bloodGroupFilterInput" class="editable-input" style="width: 100%; padding: 0.8rem 1rem; border-radius: 12px; font-size: 0.95rem; background: rgba(0,0,0,0.5); cursor: pointer;">
+                                <option value="" selected>Any Blood Group</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+                        <small id="filterFeedback" style="color: var(--text-muted); font-size: 0.85rem; height: 18px;"></small>
+                        <button class="btn btn-outline" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;" onclick="matchPatientRequest()">Match Pending Request <i class="ph ph-bell-ringing"></i></button>
+                    </div>
+                </div>
+
+                <!-- Role Simulator to demonstrate RBAC (Role-Based Access Control) -->
+                <div class="role-simulator">
+                    <div>
+                        <i class="ph-fill ph-user-switch" style="font-size: 1.5rem; color: var(--primary);"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.2rem;">Simulate Login
+                            Access</div>
+                        <select id="currentUserRole" onchange="renderTable()">
+                            <option value="ADMIN">System Administrator</option>
+                            <!-- Dynamically populated -->
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Donor Name</th>
+                            <th>Phone Number</th>
+                            <th>Blood Group</th>
+                            <th>Location</th>
+                            <th>Last Donation</th>
+                            <th>Status & Eligibility</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="donorTableBody">
+                        <!-- Rows populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Database Simulation using localStorage or default mock data
+        const ELIGIBILITY_DAYS = 90; // Donors are eligible after 90 days of last donation
+
+        let donorsDB = JSON.parse(localStorage.getItem('sanguis_donors')) || [];
+        let filteredDonorsDB = [...donorsDB];
+
+        let editingId = null;
+
+        /**
+         * Calculate if a donor is eligible based on their last donation date.
+         */
+        function checkEligibility(dateString) {
+            if (!dateString) return { eligible: true, text: "Eligible (No History)" };
+            const lastDate = new Date(dateString);
+            const today = new Date();
+            const diffTime = Math.abs(today - lastDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays >= ELIGIBILITY_DAYS) {
+                return { eligible: true, text: `Eligible` };
+            } else {
+                return { eligible: false, text: `Not Eligible (${ELIGIBILITY_DAYS - diffDays} days left)` };
+            }
+        }
+
+        /**
+         * Render the table, with Role-Based Access controls
+         */
+        function renderTable() {
+            const currentRole = document.getElementById('currentUserRole').value;
+            const tbody = document.getElementById('donorTableBody');
+            tbody.innerHTML = '';
+
+            if (filteredDonorsDB.length === 0) {
+                // Table row indicating no donors
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No donors match the current criteria.</td>`;
+                tbody.appendChild(tr);
+                return;
+            }
+
+            filteredDonorsDB.forEach(donor => {
+                const tr = document.createElement('tr');
+                const isEditing = editingId === donor.id;
+
+                // Determine RBAC permissions
+                // Admin can edit all. Donors can only edit their own ID.
+                const canEdit = currentRole === 'ADMIN' || currentRole == donor.id;
+
+                const eligibility = checkEligibility(donor.lastDonation);
+                const statusHTML = eligibility.eligible
+                    ? `<span class="status-badge status-eligible"><i class="ph-fill ph-check-circle"></i> ${eligibility.text}</span>`
+                    : `<span class="status-badge status-not-eligible"><i class="ph-fill ph-x-circle"></i> ${eligibility.text}</span>`;
+
+                if (isEditing) {
+                    // Editable Row
+                    tr.innerHTML = `
+                        <td><input type="text" class="editable-input" id="edit_name_${donor.id}" value="${donor.name}" /></td>
+                        <td><input type="text" class="editable-input" id="edit_phone_${donor.id}" value="${donor.phone}" /></td>
+                        <td>
+                            <select class="editable-input" id="edit_group_${donor.id}">
+                                ${['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'].map(g => `<option value="${g}" ${g === donor.group ? 'selected' : ''}>${g}</option>`).join('')}
+                            </select>
+                        </td>
+                        <td><input type="text" class="editable-input" id="edit_loc_${donor.id}" value="${donor.location}" /></td>
+                        <td><input type="date" class="editable-input" id="edit_date_${donor.id}" value="${donor.lastDonation}" /></td>
+                        <td>${statusHTML}</td>
+                        <td>
+                            <button class="action-btn save-btn" title="Save" onclick="saveRow(${donor.id})"><i class="ph ph-floppy-disk"></i></button>
+                            <button class="action-btn" title="Cancel" onclick="cancelEdit()"><i class="ph ph-x"></i></button>
+                        </td>
+                    `;
+                } else {
+                    // Read-only Row
+                    tr.innerHTML = `
+                        <td style="font-weight: 500;">${donor.name}</td>
+                        <td>${donor.phone}</td>
+                        <td><div class="blood-type-badge type-${donor.group.toLowerCase().replace('+', '').replace('-', '')}" style="width:36px; height:36px; font-size:0.9rem;">${donor.group}</div></td>
+                        <td>${donor.location}</td>
+                        <td>${donor.lastDonation || 'N/A'}</td>
+                        <td>${statusHTML}</td>
+                        <td>
+                            <button class="action-btn" title="Edit" ${!canEdit ? 'disabled' : ''} onclick="editRow(${donor.id})">
+                                <i class="ph ph-pencil-simple"></i>
+                            </button>
+                        </td>
+                    `;
+                }
+                tbody.appendChild(tr);
+            });
+
+            // Re-apply specific blood type styles just in case
+            applyBloodTypeBadgeStyles();
+        }
+
+        function renderRoles() {
+            const roleSelect = document.getElementById('currentUserRole');
+            const currentVal = roleSelect.value;
+
+            roleSelect.innerHTML = '<option value="ADMIN">System Administrator</option>';
+            donorsDB.forEach(donor => {
+                const opt = document.createElement('option');
+                opt.value = donor.id;
+                opt.textContent = `Login as: ${donor.name} (Donor)`;
+                roleSelect.appendChild(opt);
+            });
+
+            // Restore selection if still exists
+            if ([...roleSelect.options].some(o => o.value == currentVal)) {
+                roleSelect.value = currentVal;
+            }
+        }
+
+        function editRow(id) {
+            editingId = id;
+            renderTable();
+        }
+
+        function cancelEdit() {
+            editingId = null;
+            renderTable();
+        }
+
+        function saveRow(id) {
+            const name = document.getElementById(`edit_name_${id}`).value.trim();
+            const phone = document.getElementById(`edit_phone_${id}`).value.trim();
+            const group = document.getElementById(`edit_group_${id}`).value;
+            const location = document.getElementById(`edit_loc_${id}`).value.trim();
+            const date = document.getElementById(`edit_date_${id}`).value;
+
+            if (!name || !phone || !group || !location) {
+                alert('Please fill out all fields securely before saving.');
+                return;
+            }
+
+            // Sync with DB
+            const donorIndex = donorsDB.findIndex(d => d.id === id);
+            if (donorIndex !== -1) {
+                donorsDB[donorIndex] = { ...donorsDB[donorIndex], name, phone, group, location, lastDonation: date };
+                localStorage.setItem('sanguis_donors', JSON.stringify(donorsDB));
+                
+                // Keep filtered list in sync if editing while filtered
+                const filteredIndex = filteredDonorsDB.findIndex(d => d.id === id);
+                if (filteredIndex !== -1) {
+                     filteredDonorsDB[filteredIndex] = { ...donorsDB[donorIndex] };
+                }
+            }
+
+            editingId = null;
+            renderTable();
+        }
+
+        function applyBloodTypeBadgeStyles() {
+            document.querySelectorAll('.blood-type-badge').forEach(badge => {
+                if (!badge.classList.contains('type-ab') && !badge.classList.contains('type-o')) {
+                    // Check if it's A or B to apply relevant styles if they exist in CSS
+                    if (badge.innerText.includes('A') && !badge.innerText.includes('B')) {
+                        badge.style.background = 'rgba(33, 150, 243, 0.15)';
+                        badge.style.color = 'var(--type-a, #2196f3)';
+                        badge.style.borderColor = 'rgba(33, 150, 243, 0.3)';
+                    } else if (badge.innerText.includes('B') && !badge.innerText.includes('A')) {
+                        badge.style.background = 'rgba(255, 152, 0, 0.15)';
+                        badge.style.color = 'var(--type-b, #ff9800)';
+                        badge.style.borderColor = 'rgba(255, 152, 0, 0.3)';
+                    }
+                }
+            });
+        }
+
+        // Initialize Table & Roles
+        renderRoles();
+        renderTable();
+        
+        let debounceTimer;
+        const locationInput = document.getElementById('locationFilterInput');
+        const bgInput = document.getElementById('bloodGroupFilterInput');
+        
+        const applyFiltersDebounced = () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                filterDonorsByLocation();
+            }, 800); // 800ms debounce
+        };
+
+        if (locationInput) locationInput.addEventListener('input', applyFiltersDebounced);
+        if (bgInput) bgInput.addEventListener('change', applyFiltersDebounced);
+
+        async function filterDonorsByLocation() {
+            const searchStr = document.getElementById('locationFilterInput').value.trim();
+            const bgFilter = document.getElementById('bloodGroupFilterInput').value;
+            const feedback = document.getElementById('filterFeedback');
+            
+            if (!searchStr && !bgFilter) {
+                feedback.textContent = "";
+                filteredDonorsDB = [...donorsDB];
+                renderTable();
+                return;
+            }
+
+            // Directly filter if only blood group is selected but no location constraint
+            if (!searchStr && bgFilter) {
+                feedback.innerHTML = `<span style="color:#4caf50"><i class="ph ph-check-circle"></i> Showing all matching the explicit Blood Group: ${bgFilter}</span>`;
+                filteredDonorsDB = donorsDB.filter(d => d.group === bgFilter);
+                renderTable();
+                return;
+            }
+            
+            feedback.innerHTML = `<i class="ph ph-spinner ph-spin"></i> Searching coordinates for "${searchStr}"...`;
+            
+            try {
+                // Fetch coordinates using Nominatim API (OpenStreetMap)
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchStr)}`);
+                const data = await response.json();
+                
+                if (data && data.length > 0) {
+                    const centerLat = parseFloat(data[0].lat);
+                    const centerLng = parseFloat(data[0].lon);
+                    
+                    feedback.innerHTML = `<i class="ph ph-spinner ph-spin"></i> Filtering 5 km radius around ${data[0].display_name.substring(0, 40)}...`;
+                    
+                    filteredDonorsDB = [];
+                    
+                    // Iterate and check distances, combining precise filters dynamically
+                    for (let i = 0; i < donorsDB.length; i++) {
+                        let donor = donorsDB[i];
+
+                        // Exactly match blood group strictly if user specified one
+                        if (bgFilter && donor.group !== bgFilter) {
+                            continue; 
+                        }
+
+                        let donorLat = donor.lat;
+                        let donorLng = donor.lng;
+                        
+                        // Fallback: If donor lacks coordinates (e.g. legacy data), geocode their location string
+                        if (typeof donorLat === "undefined" || typeof donorLng === "undefined" || isNaN(donorLat) || isNaN(donorLng)) {
+                            if (donor.location && donor.location.trim() !== "") {
+                                try {
+                                    const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(donor.location)}`);
+                                    const geoData = await geoRes.json();
+                                    if (geoData && geoData.length > 0) {
+                                        donorLat = parseFloat(geoData[0].lat);
+                                        donorLng = parseFloat(geoData[0].lon);
+                                        // Save back to DB to avoid future geocoding delays
+                                        donor.lat = donorLat;
+                                        donor.lng = donorLng;
+                                        localStorage.setItem('sanguis_donors', JSON.stringify(donorsDB));
+                                    }
+                                } catch (geomErr) {
+                                    console.log("Could not reverse lookup donor location", geomErr);
+                                }
+                            }
+                        }
+                        
+                        // Proceed with valid coordinates
+                        if (donorLat !== undefined && donorLng !== undefined && !isNaN(donorLat) && !isNaN(donorLng)) {
+                            const distance = getDistance(centerLat, centerLng, donorLat, donorLng);
+                            if (distance <= 5.0) {
+                                filteredDonorsDB.push(donor);
+                            }
+                        }
+                    }
+                    
+                    if (filteredDonorsDB.length === 0) {
+                        feedback.innerHTML = `<span style="color:#ff3b30"><i class="ph ph-warning-circle"></i> No donors precisely matching ${bgFilter ? 'blood group '+bgFilter : ''} found within 5 km of this location.</span>`;
+                    } else {
+                        feedback.innerHTML = `<span style="color:#4caf50"><i class="ph ph-check-circle"></i> Showing ${filteredDonorsDB.length} accurate match(es) within 5 km.</span>`;
+                    }
+                    
+                    renderTable();
+                } else {
+                    feedback.innerHTML = `<span style="color:#ff3b30"><i class="ph ph-x-circle"></i> Location not found. Please try a valid area or city name.</span>`;
+                    filteredDonorsDB = [];
+                    renderTable();
+                }
+            } catch (error) {
+                console.error("Geocoding failed", error);
+                feedback.innerHTML = `<span style="color:#ff3b30"><i class="ph ph-warning"></i> Network error while searching location. Ensure you are connected to the internet.</span>`;
+                filteredDonorsDB = [];
+                renderTable();
+            }
+        }
+        
+        function getDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Earth's radius in km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+            return R * c; // Distance in km
+        }
+
+        async function matchPatientRequest() {
+            const requests = JSON.parse(localStorage.getItem('sanguis_requests')) || [];
+            if (requests.length === 0) {
+                alert("No pending patient requests to match.");
+                return;
+            }
+            // Prioritize the highest level or newest
+            const activeReq = requests[requests.length - 1];
+            
+            const feedback = document.getElementById('filterFeedback');
+            feedback.innerHTML = `<i class="ph ph-spinner ph-spin"></i> Matching "${activeReq.group}" donors for patient "${activeReq.name}" within 10km...`;
+            
+            try {
+                // Determine patient coordinates
+                let pLat, pLng;
+                const reqGeoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(activeReq.location)}`);
+                const reqGeoData = await reqGeoRes.json();
+                
+                if (reqGeoData && reqGeoData.length > 0) {
+                    pLat = parseFloat(reqGeoData[0].lat);
+                    pLng = parseFloat(reqGeoData[0].lon);
+                } else {
+                    alert("Could not geocode the patient request location.");
+                    feedback.innerHTML = "";
+                    return;
+                }
+
+                // Filter valid closest donors
+                let matches = [];
+                for (let i = 0; i < donorsDB.length; i++) {
+                    let donor = donorsDB[i];
+                    if (donor.group !== activeReq.group) continue; // Must match blood group exactly
+                    
+                    let dLat = donor.lat, dLng = donor.lng;
+                    if (dLat === undefined || dLng === undefined || isNaN(dLat) || isNaN(dLng)) continue; // Skip bad locs to save time here
+                    
+                    const dist = getDistance(pLat, pLng, dLat, dLng);
+                    if (dist <= 10.0) { // 10 km radius prioritization
+                        matches.push({ ...donor, matchDist: dist });
+                    }
+                }
+                
+                matches.sort((a, b) => a.matchDist - b.matchDist); // Sort by proximity
+
+                if (matches.length === 0) {
+                    feedback.innerHTML = `<span style="color:#ff3b30"><i class="ph ph-x-circle"></i> No matching ${activeReq.group} donors within 10km.</span>`;
+                    return;
+                }
+
+                feedback.innerHTML = `<i class="ph ph-check-circle" style="color:#4caf50;"></i> Found ${matches.length} matching donors. Simulating ping & acceptance...`;
+
+                setTimeout(() => {
+                    // Simulate responses
+                    // First three get Accepted, rest Rejected
+                    let acceptedDonors = JSON.parse(localStorage.getItem('sanguis_accepted_donors')) || [];
+                    
+                    matches.forEach((m, idx) => {
+                        if (idx < 3) {
+                            m.simulatedStatus = "Accepted - Details Shared";
+                            m.simulatedColor = "#4caf50";
+                            // Prevent duplicates in accepted log
+                            if (!acceptedDonors.some(ad => ad.id === m.id && ad.reqId === activeReq.id)) {
+                                acceptedDonors.push({ ...m, reqId: activeReq.id, patientName: activeReq.name, acceptedAt: new Date().toISOString() });
+                            }
+                        } else {
+                            m.simulatedStatus = "Automatically Rejected - Redundant";
+                            m.simulatedColor = "#ff9800";
+                        }
+                    });
+
+                    localStorage.setItem('sanguis_accepted_donors', JSON.stringify(acceptedDonors));
+
+                    filteredDonorsDB = matches;
+                    renderTableWithSimulation();
+                    feedback.innerHTML = `<span style="color:#4caf50"><i class="ph ph-check-circle"></i> Filtered specifically for Patient Requests (${activeReq.group} Blood, ${activeReq.units} unit)</span>`;
+                }, 1500);
+
+            } catch (err) {
+                console.error(err);
+                feedback.innerHTML = `<span style="color:#ff3b30"><i class="ph ph-warning-circle"></i> Error while matching.</span>`;
+            }
+        }
+
+        function renderTableWithSimulation() {
+            // Re-render essentially but showing simulated values instead of status
+            renderTable(); // Re-use base table but hack rows if simulated
+            const tbody = document.getElementById('donorTableBody');
+            
+            tbody.innerHTML = '';
+            filteredDonorsDB.forEach(donor => {
+                const tr = document.createElement('tr');
+                if (donor.simulatedStatus) {
+                    tr.innerHTML = `
+                        <td style="font-weight: 500;">${donor.name}</td>
+                        <td>${donor.simulatedStatus.includes('Accepted') ? donor.phone : '<em>Hidden</em>'}</td>
+                        <td><div class="blood-type-badge type-${donor.group.replace('+','').replace('-','').toLowerCase()}" style="width:36px; height:36px; font-size:0.9rem;">${donor.group}</div></td>
+                        <td>${donor.location} <small>(${donor.matchDist.toFixed(1)} km)</small></td>
+                        <td>${donor.lastDonation || 'N/A'}</td>
+                        <td><span class="status-badge" style="background: rgba(0,0,0,0.4); color: ${donor.simulatedColor}; border: 1px solid ${donor.simulatedColor}">${donor.simulatedStatus}</span></td>
+                        <td>
+                            <button class="action-btn save-btn" title="View Response"><i class="ph ph-envelope-open"></i></button>
+                        </td>
+                    `;
+                }
+                tbody.appendChild(tr);
+            });
+            applyBloodTypeBadgeStyles();
+        }
+    </script>
+</body>
+
+</html>
