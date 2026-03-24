@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BloodBee - Inventory Management</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="index.css">
+
+    <!-- Icons (Phosphor Icons) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        .inventory-section {
+            min-height: 100vh;
+            padding: 8rem 2rem 4rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .inventory-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .blood-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: stretch;
+            gap: 1.5rem;
+        }
+
+        .blood-item {
+            flex: 1 1 200px;
+            max-width: 260px;
+            min-width: 200px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            transition: var(--transition-smooth);
+        }
+
+        .blood-item:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 20px rgba(248, 50, 78, 0.1);
+        }
+
+        .stock-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stock-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: var(--text-main);
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .stock-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .stock-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            min-width: 3rem;
+            text-align: center;
+        }
+        
+        .last-updated {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        /* Table Styles for Accepted Donors */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            margin-top: 2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        th, td {
+            padding: 1.2rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-glass);
+        }
+
+        th {
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr { transition: var(--transition-smooth); }
+        tr:hover { background: rgba(255, 255, 255, 0.03); }
+        tr:last-child td { border-bottom: none; }
+    </style>
+</head>
+
+<body class="dark-theme">
+    <div class="blob-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="brand">
+                <i class="ph-fill ph-drop text-primary"></i>
+                <span>BloodBee</span>
+            </a>
+
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="register.html" class="nav-link">Register</a>
+                <a href="donors.html" class="nav-link">Donor</a>
+                <a href="emergency.html" class="nav-link">Emergency</a>
+                <a href="inventory.html" class="nav-link active">Inventory</a>
+            </div>
+
+            <div class="nav-actions">
+                <button class="btn btn-outline" id="loginBtn">Login</button>
+            </div>
+
+            <button class="mobile-toggle" id="mobileToggle">
+                <i class="ph ph-list"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <section class="inventory-section">
+            <div class="header-controls">
+                <div>
+                    <h2 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Inventory <span class="gradient-text">Management</span></h2>
+                    <p style="color: var(--text-muted);">Monitor and update the availability of blood units efficiently.</p>
+                </div>
+                <div>
+                    <button class="btn btn-outline" onclick="resetInventory()"><i class="ph ph-arrow-counter-clockwise"></i> Reset</button>
+                </div>
+            </div>
+
+            <div class="inventory-card">
+                <div class="blood-grid" id="inventoryGrid">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- Accepted Donors Tracker -->
+            <div class="header-controls" style="margin-top: 3rem;">
+                <div>
+                    <h3 style="font-size: 1.8rem;">Accepted Blood Request <span class="gradient-text">Donors</span></h3>
+                    <p style="color: var(--text-muted);">Track Incoming donations from confirmed matches precisely.</p>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Match ID</th>
+                            <th>Donor Name</th>
+                            <th>Target Hospital/Patient</th>
+                            <th>Blood Group</th>
+                            <th>Distance</th>
+                            <th>Accepted Time</th>
+                            <th>Phone</th>
+                        </tr>
+                    </thead>
+                    <tbody id="acceptedDonorsBody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentUser = JSON.parse(localStorage.getItem('sanguis_user'));
+            // Require Admin Login
+            if (!currentUser || currentUser.role !== 'admin') {
+                document.querySelector('.inventory-section').innerHTML = `
+                    <div class="glass-panel" style="text-align:center; padding: 6rem 2rem;">
+                        <i class="ph-fill ph-lock-key" style="font-size: 5rem; color: #ff3b30; margin-bottom: 1.5rem;"></i>
+                        <h2 style="color: #fff; margin-bottom: 1rem; font-size: 2.2rem;">Restricted Admin Area</h2>
+                        <p style="color: var(--text-muted); max-width: 500px; margin: 0 auto; line-height: 1.6;">Inventory data maintaining total active units and matched donations is securely restricted and visible exclusively to the system administrator.</p>
+                        <button class="btn btn-primary mt-4" onclick="document.getElementById('loginBtn').click()">Login as Admin</button>
+                    </div>
+                `;
+                return;
+            }
+
+            renderInventory();
+            renderAcceptedDonors();
+        });
+
+        const initialInventory = [
+            { group: "A+", units: 12, updated: new Date().toISOString() },
+            { group: "A-", units: 3, updated: new Date().toISOString() },
+            { group: "B+", units: 8, updated: new Date().toISOString() },
+            { group: "B-", units: 1, updated: new Date().toISOString() },
+            { group: "O+", units: 25, updated: new Date().toISOString() },
+            { group: "O-", units: 4, updated: new Date().toISOString() },
+            { group: "AB+", units: 5, updated: new Date().toISOString() },
+            { group: "AB-", units: 2, updated: new Date().toISOString() }
+        ];
+
+        let invDB = JSON.parse(localStorage.getItem('sanguis_global_inventory')) || initialInventory;
+
+        function saveInventory() {
+            localStorage.setItem('sanguis_global_inventory', JSON.stringify(invDB));
+        }
+
+        function updateUnits(index, delta) {
+            if (invDB[index].units + delta >= 0) {
+                invDB[index].units += delta;
+                invDB[index].updated = new Date().toISOString();
+                saveInventory();
+                renderInventory();
+            }
+        }
+
+        function resetInventory() {
+            if (confirm("Reset inventory to default values?")) {
+                invDB = JSON.parse(JSON.stringify(initialInventory));
+                invDB.forEach(i => i.updated = new Date().toISOString());
+                saveInventory();
+                renderInventory();
+            }
+        }
+
+        function renderInventory() {
+            const grid = document.getElementById('inventoryGrid');
+            grid.innerHTML = '';
+            
+            invDB.forEach((item, idx) => {
+                const dateObj = new Date(item.updated);
+                const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                const typeClass = item.group.includes('O') ? 'type-o' : (item.group.includes('AB') ? 'type-ab' : (item.group.includes('A') ? 'type-a' : 'type-b'));
+
+                grid.innerHTML += `
+                    <div class="blood-item">
+                        <div class="blood-type-badge ${typeClass}" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                            ${item.group}
+                        </div>
+                        <div class="stock-controls">
+                            <button class="stock-btn" onclick="updateUnits(${idx}, -1)"><i class="ph ph-minus"></i></button>
+                            <span class="stock-value" style="color: ${item.units === 0 ? '#ff3b30' : 'var(--text-main)'}">${item.units}</span>
+                            <button class="stock-btn" onclick="updateUnits(${idx}, 1)"><i class="ph ph-plus"></i></button>
+                        </div>
+                        <div class="last-updated">
+                            <i class="ph ph-clock"></i> Updated: ${timeStr}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Add custom coloring for specific types if missing in base CSS
+            document.querySelectorAll('.type-a').forEach(el => { el.style.background = 'rgba(33, 150, 243, 0.15)'; el.style.color = '#2196f3'; });
+            document.querySelectorAll('.type-b').forEach(el => { el.style.background = 'rgba(255, 152, 0, 0.15)'; el.style.color = '#ff9800'; });
+        }
+
+        function renderAcceptedDonors() {
+            const acceptedData = JSON.parse(localStorage.getItem('sanguis_accepted_donors')) || [];
+            const tbody = document.getElementById('acceptedDonorsBody');
+            tbody.innerHTML = '';
+            
+            if (acceptedData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No accepted donations recorded yet.</td></tr>`;
+                return;
+            }
+
+            // Sort by newest first
+            acceptedData.sort((a, b) => new Date(b.acceptedAt) - new Date(a.acceptedAt));
+
+            acceptedData.forEach((donor) => {
+                const dateObj = new Date(donor.acceptedAt);
+                const timeStr = dateObj.toLocaleDateString() + ' ' + dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="color: var(--text-muted);">#${donor.id.toString().padStart(4, '0')}</td>
+                    <td style="font-weight: 500; color: #fff;">${donor.name}</td>
+                    <td>${donor.patientName || 'Unknown Patient'}</td>
+                    <td>
+                        <div class="blood-type-badge type-${donor.group.replace('+','').replace('-','').toLowerCase()}" style="width: 32px; height: 32px; font-size: 0.8rem;">
+                            ${donor.group}
+                        </div>
+                    </td>
+                    <td>${(donor.matchDist || 0).toFixed(1)} km</td>
+                    <td style="color: var(--text-muted);"><i class="ph ph-clock"></i> ${timeStr}</td>
+                    <td style="color: #4caf50;">${donor.phone}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            // Reapply colors
+            document.querySelectorAll('.type-a').forEach(el => { el.style.background = 'rgba(33, 150, 243, 0.15)'; el.style.color = '#2196f3'; });
+            document.querySelectorAll('.type-b').forEach(el => { el.style.background = 'rgba(255, 152, 0, 0.15)'; el.style.color = '#ff9800'; });
+        }
+    </script>
+</body>
+
+</html>

@@ -217,11 +217,29 @@
                 </div>
 
                 <div style="flex: 1; min-width: 300px; margin: 0 1rem; position: relative;">
-                    <div style="position: relative;">
-                        <input type="text" id="locationFilterInput" class="editable-input" placeholder="Enter location name or area to filter donors within 5 km..." style="width: 100%; padding: 0.8rem 1rem 0.8rem 2.5rem; border-radius: 12px; font-size: 0.95rem; background: rgba(0,0,0,0.5);">
-                        <i class="ph ph-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; color: var(--text-muted);"></i>
+                    <div style="display: flex; gap: 1rem;">
+                        <div style="position: relative; flex: 2;">
+                            <input type="text" id="locationFilterInput" class="editable-input" placeholder="Enter location name or area to filter donors within 5 km..." style="width: 100%; padding: 0.8rem 1rem 0.8rem 2.5rem; border-radius: 12px; font-size: 0.95rem; background: rgba(0,0,0,0.5);">
+                            <i class="ph ph-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; color: var(--text-muted);"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <select id="bloodGroupFilterInput" class="editable-input" style="width: 100%; padding: 0.8rem 1rem; border-radius: 12px; font-size: 0.95rem; background: rgba(0,0,0,0.5); cursor: pointer;">
+                                <option value="" selected>Any Blood Group</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                            </select>
+                        </div>
                     </div>
-                    <small id="filterFeedback" style="color: var(--text-muted); display: block; margin-top: 0.5rem; font-size: 0.85rem; height: 18px;"></small>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+                        <small id="filterFeedback" style="color: var(--text-muted); font-size: 0.85rem; height: 18px;"></small>
+                        <button class="btn btn-outline" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;" onclick="matchPatientRequest()">Match Pending Request <i class="ph ph-bell-ringing"></i></button>
+                    </div>
                 </div>
 
                 <!-- Role Simulator to demonstrate RBAC (Role-Based Access Control) -->
@@ -436,25 +454,36 @@
         renderRoles();
         renderTable();
         
-        // Location Filter Logic
         let debounceTimer;
         const locationInput = document.getElementById('locationFilterInput');
-        if (locationInput) {
-            locationInput.addEventListener('input', () => {
-                clearTimeout(debounceTimer);
-                debounceTimer = setTimeout(() => {
-                    filterDonorsByLocation();
-                }, 800); // 800ms debounce
-            });
-        }
+        const bgInput = document.getElementById('bloodGroupFilterInput');
+        
+        const applyFiltersDebounced = () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                filterDonorsByLocation();
+            }, 800); // 800ms debounce
+        };
+
+        if (locationInput) locationInput.addEventListener('input', applyFiltersDebounced);
+        if (bgInput) bgInput.addEventListener('change', applyFiltersDebounced);
 
         async function filterDonorsByLocation() {
             const searchStr = document.getElementById('locationFilterInput').value.trim();
+            const bgFilter = document.getElementById('bloodGroupFilterInput').value;
             const feedback = document.getElementById('filterFeedback');
             
-            if (!searchStr) {
+            if (!searchStr && !bgFilter) {
                 feedback.textContent = "";
                 filteredDonorsDB = [...donorsDB];
+                renderTable();
+                return;
+            }
+
+            // Directly filter if only blood group is selected but no location constraint
+            if (!searchStr && bgFilter) {
+                feedback.innerHTML = `<span style="color:#4caf50"><i class="ph ph-check-circle"></i> Showing all matching the explicit Blood Group: ${bgFilter}</span>`;
+                filteredDonorsDB = donorsDB.filter(d => d.group === bgFilter);
                 renderTable();
                 return;
             }
@@ -474,9 +503,15 @@
                     
                     filteredDonorsDB = [];
                     
-                    // Iterate and check distances, resolving any missing coords dynamically
+                    // Iterate and check distances, combining precise filters dynamically
                     for (let i = 0; i < donorsDB.length; i++) {
                         let donor = donorsDB[i];
+
+                        // Exactly match blood group strictly if user specified one
+                        if (bgFilter && donor.group !== bgFilter) {
+                            continue; 
+                        }
+
                         let donorLat = donor.lat;
                         let donorLng = donor.lng;
                         
@@ -510,9 +545,9 @@
                     }
                     
                     if (filteredDonorsDB.length === 0) {
-                        feedback.innerHTML = `<span style="color:#ff3b30"><i class="ph ph-warning-circle"></i> No donors found within 5 km of this location.</span>`;
+                        feedback.innerHTML = `<span style="color:#ff3b30"><i class="ph ph-warning-circle"></i> No donors precisely matching ${bgFilter ? 'blood group '+bgFilter : ''} found within 5 km of this location.</span>`;
                     } else {
-                        feedback.innerHTML = `<span style="color:#4caf50"><i class="ph ph-check-circle"></i> Showing ${filteredDonorsDB.length} donor(s) within 5 km.</span>`;
+                        feedback.innerHTML = `<span style="color:#4caf50"><i class="ph ph-check-circle"></i> Showing ${filteredDonorsDB.length} accurate match(es) within 5 km.</span>`;
                     }
                     
                     renderTable();
@@ -539,6 +574,115 @@
                 Math.sin(dLon/2) * Math.sin(dLon/2);
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
             return R * c; // Distance in km
+        }
+
+        async function matchPatientRequest() {
+            const requests = JSON.parse(localStorage.getItem('sanguis_requests')) || [];
+            if (requests.length === 0) {
+                alert("No pending patient requests to match.");
+                return;
+            }
+            // Prioritize the highest level or newest
+            const activeReq = requests[requests.length - 1];
+            
+            const feedback = document.getElementById('filterFeedback');
+            feedback.innerHTML = `<i class="ph ph-spinner ph-spin"></i> Matching "${activeReq.group}" donors for patient "${activeReq.name}" within 10km...`;
+            
+            try {
+                // Determine patient coordinates
+                let pLat, pLng;
+                const reqGeoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(activeReq.location)}`);
+                const reqGeoData = await reqGeoRes.json();
+                
+                if (reqGeoData && reqGeoData.length > 0) {
+                    pLat = parseFloat(reqGeoData[0].lat);
+                    pLng = parseFloat(reqGeoData[0].lon);
+                } else {
+                    alert("Could not geocode the patient request location.");
+                    feedback.innerHTML = "";
+                    return;
+                }
+
+                // Filter valid closest donors
+                let matches = [];
+                for (let i = 0; i < donorsDB.length; i++) {
+                    let donor = donorsDB[i];
+                    if (donor.group !== activeReq.group) continue; // Must match blood group exactly
+                    
+                    let dLat = donor.lat, dLng = donor.lng;
+                    if (dLat === undefined || dLng === undefined || isNaN(dLat) || isNaN(dLng)) continue; // Skip bad locs to save time here
+                    
+                    const dist = getDistance(pLat, pLng, dLat, dLng);
+                    if (dist <= 10.0) { // 10 km radius prioritization
+                        matches.push({ ...donor, matchDist: dist });
+                    }
+                }
+                
+                matches.sort((a, b) => a.matchDist - b.matchDist); // Sort by proximity
+
+                if (matches.length === 0) {
+                    feedback.innerHTML = `<span style="color:#ff3b30"><i class="ph ph-x-circle"></i> No matching ${activeReq.group} donors within 10km.</span>`;
+                    return;
+                }
+
+                feedback.innerHTML = `<i class="ph ph-check-circle" style="color:#4caf50;"></i> Found ${matches.length} matching donors. Simulating ping & acceptance...`;
+
+                setTimeout(() => {
+                    // Simulate responses
+                    // First three get Accepted, rest Rejected
+                    let acceptedDonors = JSON.parse(localStorage.getItem('sanguis_accepted_donors')) || [];
+                    
+                    matches.forEach((m, idx) => {
+                        if (idx < 3) {
+                            m.simulatedStatus = "Accepted - Details Shared";
+                            m.simulatedColor = "#4caf50";
+                            // Prevent duplicates in accepted log
+                            if (!acceptedDonors.some(ad => ad.id === m.id && ad.reqId === activeReq.id)) {
+                                acceptedDonors.push({ ...m, reqId: activeReq.id, patientName: activeReq.name, acceptedAt: new Date().toISOString() });
+                            }
+                        } else {
+                            m.simulatedStatus = "Automatically Rejected - Redundant";
+                            m.simulatedColor = "#ff9800";
+                        }
+                    });
+
+                    localStorage.setItem('sanguis_accepted_donors', JSON.stringify(acceptedDonors));
+
+                    filteredDonorsDB = matches;
+                    renderTableWithSimulation();
+                    feedback.innerHTML = `<span style="color:#4caf50"><i class="ph ph-check-circle"></i> Filtered specifically for Patient Requests (${activeReq.group} Blood, ${activeReq.units} unit)</span>`;
+                }, 1500);
+
+            } catch (err) {
+                console.error(err);
+                feedback.innerHTML = `<span style="color:#ff3b30"><i class="ph ph-warning-circle"></i> Error while matching.</span>`;
+            }
+        }
+
+        function renderTableWithSimulation() {
+            // Re-render essentially but showing simulated values instead of status
+            renderTable(); // Re-use base table but hack rows if simulated
+            const tbody = document.getElementById('donorTableBody');
+            
+            tbody.innerHTML = '';
+            filteredDonorsDB.forEach(donor => {
+                const tr = document.createElement('tr');
+                if (donor.simulatedStatus) {
+                    tr.innerHTML = `
+                        <td style="font-weight: 500;">${donor.name}</td>
+                        <td>${donor.simulatedStatus.includes('Accepted') ? donor.phone : '<em>Hidden</em>'}</td>
+                        <td><div class="blood-type-badge type-${donor.group.replace('+','').replace('-','').toLowerCase()}" style="width:36px; height:36px; font-size:0.9rem;">${donor.group}</div></td>
+                        <td>${donor.location} <small>(${donor.matchDist.toFixed(1)} km)</small></td>
+                        <td>${donor.lastDonation || 'N/A'}</td>
+                        <td><span class="status-badge" style="background: rgba(0,0,0,0.4); color: ${donor.simulatedColor}; border: 1px solid ${donor.simulatedColor}">${donor.simulatedStatus}</span></td>
+                        <td>
+                            <button class="action-btn save-btn" title="View Response"><i class="ph ph-envelope-open"></i></button>
+                        </td>
+                    `;
+                }
+                tbody.appendChild(tr);
+            });
+            applyBloodTypeBadgeStyles();
         }
     </script>
 </body>

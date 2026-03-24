@@ -255,7 +255,7 @@
                             <div class="blood-type-badge" style="background: rgba(0,0,0,0.3); color: var(--text-main); font-size:1rem;">${req.group}</div>
                             <div class="tracking-info">
                                 <h4 style="color: ${levelColor}; font-size: 0.9rem;">${req.level} Level Request</h4>
-                                <p>${req.location}</p>
+                                <p>${req.hospital || req.location} • ${req.units ? req.units + ' Units' : '1 Unit'}</p>
                             </div>
                         </div>`;
                     }
@@ -272,8 +272,10 @@
                             <div class="blood-type-badge" style="background: rgba(255,255,255,0.1); border:none; width:45px; height:45px;">${req.group}</div>
                         </div>
                         <div style="margin-top:1rem; display:flex; flex-direction:column; gap:0.5rem; font-size:0.9rem; color:var(--text-muted);">
+                            <div style="display:flex; align-items:center; gap:0.5rem;"><i class="ph-fill ph-buildings" style="color:var(--text-main);"></i> ${req.hospital || 'Hospital not specified'}</div>
                             <div style="display:flex; align-items:center; gap:0.5rem;"><i class="ph-fill ph-map-pin" style="color:var(--text-main);"></i> ${req.location}</div>
-                            <div style="display:flex; align-items:center; gap:0.5rem;"><i class="ph-fill ph-check-circle" style="color:var(--text-main);"></i> Required By: ${reqDate.toLocaleDateString()}</div>
+                            <div style="display:flex; align-items:center; gap:0.5rem;"><i class="ph-fill ph-drop" style="color:var(--text-main);"></i> Units Required: <strong style="color:var(--text-main);">${req.units || 1}</strong></div>
+                            <div style="display:flex; align-items:center; gap:0.5rem;"><i class="ph-fill ph-clock" style="color:var(--text-main);"></i> Listed: ${reqDate.toLocaleDateString()} ${reqDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                             <div style="display:flex; align-items:center; gap:0.5rem;"><i class="ph-fill ph-phone" style="color:var(--text-main);"></i> ${req.phone || 'N/A'}</div>
                             <div style="display:flex; align-items:center; gap:0.5rem;"><i class="ph-fill ph-heartbeat" style="color:var(--text-main);"></i> Severity: <strong style="color:${levelColor};">${req.level}</strong></div>
                         </div>

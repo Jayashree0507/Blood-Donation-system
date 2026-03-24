@@ -370,4 +370,91 @@ document.addEventListener("DOMContentLoaded", () => {
         window.addEventListener('resize', updatePager);
         updatePager();
     }
+
+    // --- Emergency Alert System ---
+    const checkEmergencies = () => {
+        const requests = JSON.parse(localStorage.getItem('sanguis_requests')) || [];
+        const criticals = requests.filter(r => r.level === 'Critical' || r.level === 'Emergency');
+        if (criticals.length === 0) return;
+
+        const latest = criticals[criticals.length - 1]; // Assume last is newest
+        const lastSeen = sessionStorage.getItem('last_seen_emergency_id');
+
+        if (latest.id.toString() !== lastSeen) {
+            triggerEmergencyAlert(latest);
+            sessionStorage.setItem('last_seen_emergency_id', latest.id.toString());
+        }
+    };
+
+    const triggerEmergencyAlert = (req) => {
+        // Play beep sound using AudioContext
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(ctx.destination);
+            osc.type = "square";
+            osc.frequency.setValueAtTime(800, ctx.currentTime); // 800Hz beep sound
+            gainNode.gain.setValueAtTime(0.1, ctx.currentTime); // low volume
+            osc.start();
+            osc.stop(ctx.currentTime + 0.5);
+            
+            setTimeout(() => {
+                const osc2 = ctx.createOscillator();
+                const gain2 = ctx.createGain();
+                osc2.connect(gain2);
+                gain2.connect(ctx.destination);
+                osc2.type = "square";
+                osc2.frequency.setValueAtTime(800, ctx.currentTime);
+                gain2.gain.setValueAtTime(0.1, ctx.currentTime);
+                osc2.start();
+                osc2.stop(ctx.currentTime + 0.5);
+            }, 600);
+        } catch(e) { console.warn("AudioContext playback blocked", e); }
+
+        // Create Full Page Alert Overlay
+        const overlay = document.createElement('div');
+        overlay.className = "emergency-alert-overlay";
+        overlay.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(255, 0, 0, 0.9); z-index: 999999;
+            display: flex; align-items: center; justify-content: center;
+            color: white; text-align: center; font-family: 'Outfit', sans-serif;
+            animation: flashOverlay 1s infinite alternate;
+        `;
+        overlay.innerHTML = `
+            <style>
+                @keyframes flashOverlay { 
+                    from { background: rgba(255, 0, 0, 0.85); } 
+                    to { background: rgba(200, 0, 0, 0.95); } 
+                }
+            </style>
+            <div style="background: #111; padding: 3rem; border-radius: 20px; border: 4px solid #ff3b30; box-shadow: 0 0 50px rgba(255,59,48,0.5); max-width: 600px; width: 90%;">
+                <i class="ph-fill ph-warning" style="font-size: 5rem; color: #ff3b30; margin-bottom: 1rem; display: block; animation: pulse 1s infinite;"></i>
+                <h1 style="font-size: 2.5rem; margin-bottom: 1rem; color: #ff3b30; line-height:1.2;">EMERGENCY BLOOD REQUIRED!</h1>
+                <h2 style="font-size: 1.8rem; margin-bottom: 1.5rem; color: #fff;">Wait, someone needs ${req.group} Blood immediately</h2>
+                <div style="text-align: left; background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; font-size: 1.2rem; line-height:1.6;">
+                    <p><strong>Patient/Hospital:</strong> ${req.name}</p>
+                    <p><strong>Units Required:</strong> ${req.units || 1}</p>
+                    <p><strong>Location:</strong> ${req.hospital || req.location}</p>
+                </div>
+                <div style="display:flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <button id="dismissAlertBtn" class="btn btn-outline" style="border-color: #fff; color: #fff; padding: 1rem 2rem; font-size: 1.1rem; border-radius: 12px; cursor: pointer;">Dismiss</button>
+                    <!-- Navigates directly to donors matching -->
+                    <button id="actNowBtn" class="btn" style="background: #ff3b30; color: #fff; padding: 1rem 2rem; font-size: 1.1rem; border: none; border-radius: 12px; cursor: pointer;">Act Now (Donor Match)</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+
+        document.getElementById('dismissAlertBtn').onclick = () => overlay.remove();
+        document.getElementById('actNowBtn').onclick = () => {
+            overlay.remove();
+            window.location.href = "donors.html";
+        };
+    };
+
+    // Check every 2 seconds for new critical emergencies
+    setInterval(checkEmergencies, 2000);
 });
