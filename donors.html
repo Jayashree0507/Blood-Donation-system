@@ -216,6 +216,14 @@
                     <p style="color: var(--text-muted);">View, maintain and manage eligible donors efficiently.</p>
                 </div>
 
+                <div style="flex: 1; min-width: 300px; margin: 0 1rem; position: relative;">
+                    <div style="position: relative;">
+                        <input type="text" id="locationFilterInput" class="editable-input" placeholder="Enter location name or area to filter donors within 5 km..." style="width: 100%; padding: 0.8rem 1rem 0.8rem 2.5rem; border-radius: 12px; font-size: 0.95rem; background: rgba(0,0,0,0.5);">
+                        <i class="ph ph-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; color: var(--text-muted);"></i>
+                    </div>
+                    <small id="filterFeedback" style="color: var(--text-muted); display: block; margin-top: 0.5rem; font-size: 0.85rem; height: 18px;"></small>
+                </div>
+
                 <!-- Role Simulator to demonstrate RBAC (Role-Based Access Control) -->
                 <div class="role-simulator">
                     <div>
@@ -259,6 +267,7 @@
         const ELIGIBILITY_DAYS = 90; // Donors are eligible after 90 days of last donation
 
         let donorsDB = JSON.parse(localStorage.getItem('sanguis_donors')) || [];
+        let filteredDonorsDB = [...donorsDB];
 
         let editingId = null;
 
@@ -287,7 +296,15 @@
             const tbody = document.getElementById('donorTableBody');
             tbody.innerHTML = '';
 
-            donorsDB.forEach(donor => {
+            if (filteredDonorsDB.length === 0) {
+                // Table row indicating no donors
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No donors match the current criteria.</td>`;
+                tbody.appendChild(tr);
+                return;
+            }
+
+            filteredDonorsDB.forEach(donor => {
                 const tr = document.createElement('tr');
                 const isEditing = editingId === donor.id;
 
@@ -386,6 +403,12 @@
             if (donorIndex !== -1) {
                 donorsDB[donorIndex] = { ...donorsDB[donorIndex], name, phone, group, location, lastDonation: date };
                 localStorage.setItem('sanguis_donors', JSON.stringify(donorsDB));
+                
+                // Keep filtered list in sync if editing while filtered
+                const filteredIndex = filteredDonorsDB.findIndex(d => d.id === id);
+                if (filteredIndex !== -1) {
+                     filteredDonorsDB[filteredIndex] = { ...donorsDB[donorIndex] };
+                }
             }
 
             editingId = null;
@@ -412,6 +435,111 @@
         // Initialize Table & Roles
         renderRoles();
         renderTable();
+        
+        // Location Filter Logic
+        let debounceTimer;
+        const locationInput = document.getElementById('locationFilterInput');
+        if (locationInput) {
+            locationInput.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    filterDonorsByLocation();
+                }, 800); // 800ms debounce
+            });
+        }
+
+        async function filterDonorsByLocation() {
+            const searchStr = document.getElementById('locationFilterInput').value.trim();
+            const feedback = document.getElementById('filterFeedback');
+            
+            if (!searchStr) {
+                feedback.textContent = "";
+                filteredDonorsDB = [...donorsDB];
+                renderTable();
+                return;
+            }
+            
+            feedback.innerHTML = `<i class="ph ph-spinner ph-spin"></i> Searching coordinates for "${searchStr}"...`;
+            
+            try {
+                // Fetch coordinates using Nominatim API (OpenStreetMap)
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchStr)}`);
+                const data = await response.json();
+                
+                if (data && data.length > 0) {
+                    const centerLat = parseFloat(data[0].lat);
+                    const centerLng = parseFloat(data[0].lon);
+                    
+                    feedback.innerHTML = `<i class="ph ph-spinner ph-spin"></i> Filtering 5 km radius around ${data[0].display_name.substring(0, 40)}...`;
+                    
+                    filteredDonorsDB = [];
+                    
+                    // Iterate and check distances, resolving any missing coords dynamically
+                    for (let i = 0; i < donorsDB.length; i++) {
+                        let donor = donorsDB[i];
+                        let donorLat = donor.lat;
+                        let donorLng = donor.lng;
+                        
+                        // Fallback: If donor lacks coordinates (e.g. legacy data), geocode their location string
+                        if (typeof donorLat === "undefined" || typeof donorLng === "undefined" || isNaN(donorLat) || isNaN(donorLng)) {
+                            if (donor.location && donor.location.trim() !== "") {
+                                try {
+                                    const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(donor.location)}`);
+                                    const geoData = await geoRes.json();
+                                    if (geoData && geoData.length > 0) {
+                                        donorLat = parseFloat(geoData[0].lat);
+                                        donorLng = parseFloat(geoData[0].lon);
+                                        // Save back to DB to avoid future geocoding delays
+                                        donor.lat = donorLat;
+                                        donor.lng = donorLng;
+                                        localStorage.setItem('sanguis_donors', JSON.stringify(donorsDB));
+                                    }
+                                } catch (geomErr) {
+                                    console.log("Could not reverse lookup donor location", geomErr);
+                                }
+                            }
+                        }
+                        
+                        // Proceed with valid coordinates
+                        if (donorLat !== undefined && donorLng !== undefined && !isNaN(donorLat) && !isNaN(donorLng)) {
+                            const distance = getDistance(centerLat, centerLng, donorLat, donorLng);
+                            if (distance <= 5.0) {
+                                filteredDonorsDB.push(donor);
+                            }
+                        }
+                    }
+                    
+                    if (filteredDonorsDB.length === 0) {
+                        feedback.innerHTML = `<span style="color:#ff3b30"><i class="ph ph-warning-circle"></i> No donors found within 5 km of this location.</span>`;
+                    } else {
+                        feedback.innerHTML = `<span style="color:#4caf50"><i class="ph ph-check-circle"></i> Showing ${filteredDonorsDB.length} donor(s) within 5 km.</span>`;
+                    }
+                    
+                    renderTable();
+                } else {
+                    feedback.innerHTML = `<span style="color:#ff3b30"><i class="ph ph-x-circle"></i> Location not found. Please try a valid area or city name.</span>`;
+                    filteredDonorsDB = [];
+                    renderTable();
+                }
+            } catch (error) {
+                console.error("Geocoding failed", error);
+                feedback.innerHTML = `<span style="color:#ff3b30"><i class="ph ph-warning"></i> Network error while searching location. Ensure you are connected to the internet.</span>`;
+                filteredDonorsDB = [];
+                renderTable();
+            }
+        }
+        
+        function getDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Earth's radius in km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+            return R * c; // Distance in km
+        }
     </script>
 </body>
 

@@ -416,6 +416,8 @@
                                             readonly required>
                                         <input type="text" id="longitude" class="form-input" placeholder="Longitude"
                                             readonly required>
+                                        <input type="hidden" id="trueLatitude">
+                                        <input type="hidden" id="trueLongitude">
                                     </div>
                                     <button type="button" class="btn btn-outline btn-location"
                                         onclick="getLocation(this)">
@@ -492,6 +494,9 @@
                     async (position) => {
                         const lat = position.coords.latitude;
                         const lng = position.coords.longitude;
+                        
+                        document.getElementById('trueLatitude').value = lat;
+                        document.getElementById('trueLongitude').value = lng;
 
                         try {
                             status.textContent = "Translating coordinates to area name...";
@@ -595,9 +600,21 @@
 
             if (role === 'donor') {
                 const lastDonation = document.getElementById('lastDonation').value;
+                const trueLat = parseFloat(document.getElementById('trueLatitude').value);
+                const trueLng = parseFloat(document.getElementById('trueLongitude').value);
+                
                 let donorsDB = JSON.parse(localStorage.getItem('sanguis_donors')) || [];
                 const newId = donorsDB.length > 0 ? Math.max(...donorsDB.map(d => d.id)) + 1 : 1;
-                const newDonor = { id: newId, name, phone, group, location: locationName, lastDonation };
+                const newDonor = { 
+                    id: newId, 
+                    name, 
+                    phone, 
+                    group, 
+                    location: locationName, 
+                    lastDonation,
+                    lat: trueLat,
+                    lng: trueLng
+                };
                 donorsDB.push(newDonor);
                 localStorage.setItem('sanguis_donors', JSON.stringify(donorsDB));
             } else if (role === 'patient') {
