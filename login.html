@@ -1,22 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sanguis - Login</title>
-    <meta name="description" content="Sign in to your Sanguis blood management account.">
-    
+    <title>BloodBee - Login</title>
+    <meta name="description" content="Sign in to your BloodBee blood management account.">
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
     <!-- Custom CSS -->
     <link rel="stylesheet" href="index.css">
-    
+
     <!-- Icons (Phosphor Icons) -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
+
     <style>
         .login-page {
             min-height: 100vh;
@@ -80,7 +83,7 @@
         .form-section input,
         .form-section select {
             width: 100%;
-            background: rgba(0,0,0,0.3);
+            background: rgba(0, 0, 0, 0.3);
             border: 1px solid var(--border-glass);
             border-radius: 12px;
             padding: 0.9rem 1.1rem;
@@ -174,7 +177,7 @@
             width: 50px;
             height: 50px;
             border-radius: 12px;
-            background: rgba(0,0,0,0.3);
+            background: rgba(0, 0, 0, 0.3);
             border: 1px solid var(--border-glass);
             color: var(--text-main);
             cursor: pointer;
@@ -279,6 +282,7 @@
         }
     </style>
 </head>
+
 <body class="dark-theme">
     <div class="blob-bg">
         <div class="blob blob-1"></div>
@@ -296,10 +300,10 @@
                 </div>
 
                 <form id="pageLoginForm">
-                    <!-- Email -->
+                    <!-- Username, Email or Phone -->
                     <div class="form-section">
-                        <label for="email">Email Address</label>
-                        <input type="email" id="email" required placeholder="your@email.com">
+                        <label for="email">Username, Email or Phone</label>
+                        <input type="text" id="email" required placeholder="Enter identifier">
                     </div>
 
                     <!-- Password -->
@@ -311,7 +315,8 @@
                     <!-- Remember & Forgot -->
                     <div class="remember-forgot">
                         <label style="display: flex; gap: 0.5rem; align-items: center; cursor: pointer;">
-                            <input type="checkbox" style="width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer;">
+                            <input type="checkbox"
+                                style="width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer;">
                             <span>Remember me</span>
                         </label>
                         <a href="#">Forgot password?</a>
@@ -345,7 +350,7 @@
             <!-- Promo Section -->
             <div class="login-promo">
                 <div class="promo-title">Save Lives Today</div>
-                
+
                 <ul class="promo-list">
                     <li>
                         <i class="ph-fill ph-heartbeat"></i>
@@ -388,20 +393,70 @@
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const form = document.getElementById("pageLoginForm");
-            
+
+            async function hashPassword(pwd) {
+                const msgBuffer = new TextEncoder().encode(pwd);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            }
+
             if (form) {
                 form.addEventListener("submit", async (e) => {
                     e.preventDefault();
-                    
-                    const email = document.getElementById("email").value;
+
+                    const identifier = document.getElementById("email").value.trim();
                     const password = document.getElementById("password").value;
                     const btn = e.target.querySelector('button[type="submit"]');
                     const originalText = btn.innerHTML;
-                    
+
                     btn.innerHTML = `<i class="ph ph-spinner-gap ph-spin"></i> Signing in...`;
                     btn.disabled = true;
 
-                    // Simulate API call
+                    // 1. Strict Administrator Validation
+                    const normalizedId = identifier.toLowerCase();
+                    if ((normalizedId === 'harini' || normalizedId === 'jayashree') && password === 'Harini@2005') {
+                        setTimeout(() => {
+                            btn.innerHTML = `<i class="ph ph-shield-check"></i> Admin Login Successful!`;
+                            btn.style.backgroundColor = "#4caf50";
+                            btn.style.boxShadow = "0 4px 15px rgba(76, 175, 80, 0.4)";
+
+                            localStorage.setItem('sanguis_user', JSON.stringify({ 
+                                name: identifier, 
+                                email: identifier, 
+                                role: "admin",
+                                loginTime: new Date().toISOString()
+                            }));
+
+                            setTimeout(() => {
+                                window.location.href = 'inventory.html';
+                            }, 1000);
+                        }, 900);
+                        return;
+                    } else if (normalizedId === 'harini' || normalizedId === 'jayashree') {
+                        // Prevent brute forcing the admin account gently
+                        setTimeout(() => {
+                            alert("Invalid admin password.");
+                            btn.innerHTML = originalText;
+                            btn.disabled = false;
+                        }, 400);
+                        return;
+                    }
+
+                    // 2. Regular User Validation
+                    const hashedAttempt = await hashPassword(password);
+                    const usersDB = JSON.parse(localStorage.getItem('sanguis_users')) || [];
+                    const user = usersDB.find(u => u.phone === identifier || u.name === identifier || (u.email && u.email === identifier));
+
+                    if (!user || user.password !== hashedAttempt) {
+                        setTimeout(() => {
+                            alert("Invalid credentials. Please enter the correct registered username/phone and password.");
+                            btn.innerHTML = originalText;
+                            btn.disabled = false;
+                        }, 400);
+                        return;
+                    }
+
                     setTimeout(() => {
                         btn.innerHTML = `<i class="ph ph-check-circle"></i> Login Successful!`;
                         btn.style.backgroundColor = "#4caf50";
@@ -409,25 +464,32 @@
 
                         // Store user data
                         localStorage.setItem('sanguis_user', JSON.stringify({ 
-                            email: email, 
-                            loginTime: new Date().toISOString(),
-                            role: "user"
+                            name: user.name,
+                            phone: user.phone,
+                            role: user.role, 
+                            loginTime: new Date().toISOString()
                         }));
 
-                        // Redirect after short delay
+                        // Role-based Redirect
                         setTimeout(() => {
-                            window.location.href = 'index.html';
+                            if (user.role === 'donor') window.location.href = "donors.html";
+                            else if (user.role === 'patient') window.location.href = "emergency.html";
+                            else window.location.href = 'index.html';
                         }, 1000);
                     }, 900);
                 });
             }
 
             // Check if already logged in
-            const savedUser = localStorage.getItem('sanguis_user');
-            if (savedUser) {
-                window.location.href = 'index.html';
+            const rawUser = localStorage.getItem('sanguis_user');
+            if (rawUser) {
+                const savedUser = JSON.parse(rawUser);
+                if (savedUser.role === 'admin') window.location.href = 'inventory.html';
+                else if (savedUser.role === 'donor') window.location.href = 'donors.html';
+                else window.location.href = 'index.html';
             }
         });
     </script>
 </body>
+
 </html>

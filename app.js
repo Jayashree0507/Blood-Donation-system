@@ -87,7 +87,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (loginBtn) {
-        loginBtn.addEventListener("click", () => openModal(loginModal));
+        loginBtn.addEventListener("click", () => {
+             window.location.href = "login.html";
+        });
     }
 
     if (closeModalBtns && closeModalBtns.length) {
@@ -214,15 +216,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Handle Login Button Toggle
     if (loginBtn) {
-        const savedUser = localStorage.getItem('sanguis_user');
+        const rawUser = localStorage.getItem('sanguis_user');
+        const savedUser = rawUser ? JSON.parse(rawUser) : null;
+
+        // Hide ALL Inventory links from nav if the user is not an administrator
+        const navInventoryLinks = document.querySelectorAll('nav .nav-link[href*="inventory.html"], footer .nav-link[href*="inventory.html"]');
+        navInventoryLinks.forEach(link => {
+            if (!savedUser || savedUser.role !== 'admin') {
+                link.style.display = 'none';
+                // Remove from DOM entirely for screen readers and search to prevent manual bypassing
+                link.remove();
+            }
+        });
+
         if (savedUser) {
             loginBtn.textContent = "Logout";
             loginBtn.classList.add("logged-in");
-            loginBtn.removeEventListener("click", () => openModal(loginModal));
-            loginBtn.addEventListener("click", () => {
+            
+            // Clone and replace to cleanly strip the default login.html redirect listener
+            const newBtn = loginBtn.cloneNode(true);
+            if (loginBtn.parentNode) {
+                loginBtn.parentNode.replaceChild(newBtn, loginBtn);
+            }
+            
+            newBtn.addEventListener("click", () => {
                 localStorage.removeItem('sanguis_user');
-                loginBtn.textContent = "Login";
-                loginBtn.classList.remove("logged-in");
+                newBtn.textContent = "Login";
+                newBtn.classList.remove("logged-in");
                 location.reload();
             });
         }
@@ -438,6 +458,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     <p><strong>Patient/Hospital:</strong> ${req.name}</p>
                     <p><strong>Units Required:</strong> ${req.units || 1}</p>
                     <p><strong>Location:</strong> ${req.hospital || req.location}</p>
+                    <p style="margin-top: 0.8rem; padding: 0.8rem; background: rgba(0,0,0,0.3); border-radius: 8px; display: inline-block;">
+                        <strong style="color: #ff3b30;"><i class="ph-fill ph-phone" style="vertical-align: middle;"></i> Emergency Contact:</strong> 
+                        <a href="tel:${req.phone ? req.phone.replace(/[^0-9+]/g, '') : ''}" style="color: #fff; text-decoration: none; font-weight: bold; margin-left: 0.5rem; letter-spacing: 1px;">
+                            ${req.phone ? req.phone.replace(/[<&>]/g, '') : 'Not Provided'}
+                        </a>
+                    </p>
                 </div>
                 <div style="display:flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
                     <button id="dismissAlertBtn" class="btn btn-outline" style="border-color: #fff; color: #fff; padding: 1rem 2rem; font-size: 1.1rem; border-radius: 12px; cursor: pointer;">Dismiss</button>

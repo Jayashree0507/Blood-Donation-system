@@ -197,7 +197,7 @@
             </div>
 
             <div class="nav-actions">
-                <button class="btn btn-outline" onclick="window.location.href='index.html'">Login</button>
+                <button class="btn btn-outline" id="loginBtn">Login</button>
             </div>
 
             <button class="mobile-toggle" id="mobileToggle">
@@ -281,6 +281,13 @@
     </main>
 
     <script>
+        // Authentication & Role-Based Access Control
+        const sessionUser = JSON.parse(localStorage.getItem('sanguis_user'));
+        if (!sessionUser) {
+            window.location.href = 'login.html';
+        } 
+        // Patients are now allowed to view the list to ensure transparency as requested.
+
         // Database Simulation using localStorage or default mock data
         const ELIGIBILITY_DAYS = 90; // Donors are eligible after 90 days of last donation
 
@@ -310,7 +317,10 @@
          * Render the table, with Role-Based Access controls
          */
         function renderTable() {
-            const currentRole = document.getElementById('currentUserRole').value;
+            const currentUser = JSON.parse(localStorage.getItem('sanguis_user'));
+            const isAdmin = currentUser && currentUser.role === 'admin';
+            const simulatedRole = isAdmin ? (document.getElementById('currentUserRole').value || 'ADMIN') : 'DONOR';
+
             const tbody = document.getElementById('donorTableBody');
             tbody.innerHTML = '';
 
@@ -327,8 +337,15 @@
                 const isEditing = editingId === donor.id;
 
                 // Determine RBAC permissions
-                // Admin can edit all. Donors can only edit their own ID.
-                const canEdit = currentRole === 'ADMIN' || currentRole == donor.id;
+                // Admin can edit all. Donors can only edit their own profile.
+                let canEdit = false;
+                if (isAdmin && simulatedRole === 'ADMIN') {
+                    canEdit = true;
+                } else if (!isAdmin && currentUser && currentUser.name === donor.name) {
+                    canEdit = true;
+                } else if (isAdmin && simulatedRole == donor.id) {
+                    canEdit = true;
+                }
 
                 const eligibility = checkEligibility(donor.lastDonation);
                 const statusHTML = eligibility.eligible
@@ -378,19 +395,42 @@
 
         function renderRoles() {
             const roleSelect = document.getElementById('currentUserRole');
-            const currentVal = roleSelect.value;
+            const roleSimulatorContainer = document.querySelector('.role-simulator');
+            const currentVal = roleSelect ? roleSelect.value : null;
+            const currentUser = JSON.parse(localStorage.getItem('sanguis_user'));
 
-            roleSelect.innerHTML = '<option value="ADMIN">System Administrator</option>';
-            donorsDB.forEach(donor => {
+            if (!currentUser || currentUser.role === 'patient') {
+                if (roleSimulatorContainer) roleSimulatorContainer.style.display = 'none';
+                return;
+            } else {
+                if (roleSimulatorContainer) roleSimulatorContainer.style.display = 'flex';
+            }
+
+            // Reset and Rebuild
+            roleSelect.innerHTML = '';
+            roleSelect.disabled = false;
+
+            if (currentUser.role === 'admin') {
+                // Administrators see full role switcher
+                roleSelect.innerHTML = '<option value="ADMIN">System Administrator (Root)</option>';
+                donorsDB.forEach(donor => {
+                    const opt = document.createElement('option');
+                    opt.value = donor.id;
+                    opt.textContent = `Login: ${donor.name} (Donor)`;
+                    roleSelect.appendChild(opt);
+                });
+                
+                // Restore selection if still exists
+                if ([...roleSelect.options].some(o => o.value == currentVal)) {
+                    roleSelect.value = currentVal;
+                }
+            } else if (currentUser.role === 'donor') {
+                // Donors only see their own active session with NO administrative details
                 const opt = document.createElement('option');
-                opt.value = donor.id;
-                opt.textContent = `Login as: ${donor.name} (Donor)`;
+                opt.value = "DONOR_SELF";
+                opt.textContent = `${currentUser.name} (Donor Role)`;
                 roleSelect.appendChild(opt);
-            });
-
-            // Restore selection if still exists
-            if ([...roleSelect.options].some(o => o.value == currentVal)) {
-                roleSelect.value = currentVal;
+                roleSelect.disabled = true; // Cannot switch roles as a general donor
             }
         }
 

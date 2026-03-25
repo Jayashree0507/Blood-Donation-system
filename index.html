@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sanguis - Premium Blood Management System</title>
+    <title>BloodBee - Premium Blood Management System</title>
     <meta name="description"
         content="A state-of-the-art blood management and donation system. Connect donors with those in need seamlessly.">
 
@@ -188,54 +188,6 @@
     </footer>
 
     <!-- Modals (Hidden by default) -->
-    <!-- Login Modal -->
-    <div class="modal-overlay" id="loginModal">
-        <div class="modal glass-panel login-modal">
-            <button class="close-modal"><i class="ph ph-x"></i></button>
-            <div class="modal-header">
-                <h3>Login to Sanguis</h3>
-                <p>Sign in to access your blood management account.</p>
-            </div>
-            <form class="modal-form" id="loginForm">
-                <div class="input-group">
-                    <label>Phone Number / Username</label>
-                    <input type="text" required class="form-input" placeholder="e.g. +1 234 567 8900">
-                </div>
-                <div class="input-group">
-                    <label>Password</label>
-                    <input type="password" required class="form-input" placeholder="••••••••">
-                </div>
-                <div class="form-row" style="justify-content: space-between; align-items: center;">
-                    <label class="checkbox-label">
-                        <input type="checkbox"> Remember me
-                    </label>
-                    <a href="#" class="text-link">Forgot password?</a>
-                </div>
-                <button type="submit" class="btn btn-primary btn-block mt-4">Login</button>
-
-                <div class="divider">
-                    <span>Or continue with</span>
-                </div>
-
-                <div class="social-login">
-                    <button type="button" class="btn btn-social" title="Login with Google">
-                        <i class="ph ph-envelope"></i>
-                    </button>
-                    <button type="button" class="btn btn-social" title="Login with Apple">
-                        <i class="ph ph-apple-logo"></i>
-                    </button>
-                    <button type="button" class="btn btn-social" title="Login with Microsoft">
-                        <i class="ph ph-windows-logo"></i>
-                    </button>
-                </div>
-
-                <p class="signup-link mt-4">
-                    Don't have an account? <a href="register.html" class="text-link font-semibold">Sign up here</a>
-                </p>
-            </form>
-        </div>
-    </div>
-
     <!-- Request Modal -->
     <div class="modal-overlay" id="requestModal">
         <div class="modal glass-panel">
@@ -324,11 +276,21 @@
                     // Populate top tracker (max 3 items)
                     if (idx < 3) {
                         homeHTML += `
-                        <div class="tracking-card mt-3" style="border-left: 3px solid ${levelColor};">
+                        <div class="tracking-card mt-3" style="border-left: 3px solid ${levelColor}; padding: 1rem; align-items: flex-start; gap: 1rem;">
                             <div class="blood-type-badge" style="background: rgba(0,0,0,0.3); color: var(--text-main); font-size:1rem;">${req.group}</div>
-                            <div class="tracking-info">
-                                <h4 style="color: ${levelColor}; font-size: 0.9rem;">${req.level} Level Request</h4>
-                                <p>${req.hospital || req.location} • ${req.units ? req.units + ' Units' : '1 Unit'}</p>
+                            <div class="tracking-info" style="flex: 1;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                    <div>
+                                        <h4 style="color: ${levelColor}; font-size: 0.9rem;">${req.level} Level Request</h4>
+                                        <p>${req.hospital || req.location} • ${req.units ? req.units + ' Units' : '1 Unit'}</p>
+                                    </div>
+                                    <a href="tel:${req.phone ? req.phone.replace(/[^0-9+]/g, '') : ''}" class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.8rem; border-color: ${levelColor}; color: ${levelColor}; display: inline-flex; align-items: center; gap: 0.3rem;">
+                                        <i class="ph-fill ph-phone" style="font-size: 1rem;"></i> Call
+                                    </a>
+                                </div>
+                                <div style="margin-top: 0.4rem; font-size: 0.85rem; color: var(--text-muted);">
+                                    Phone: <span style="color: var(--text-main); font-weight: 500;">${req.phone ? req.phone.replace(/[<&>]/g, '') : 'N/A'}</span>
+                                </div>
                             </div>
                         </div>`;
                     }
@@ -344,6 +306,20 @@
                             </div>
                             <div class="blood-type-badge" style="background: rgba(255,255,255,0.1); border:none; width:45px; height:45px;">${req.group}</div>
                         </div>
+
+                        <!-- Highly Visible Phone Number for Responders -->
+                        <div style="margin-top: 1rem; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 0.8rem; display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <span style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 0.2rem;">Contact Patient/Guardian</span>
+                                <a href="tel:${req.phone ? req.phone.replace(/[^0-9+]/g, '') : ''}" style="color: var(--text-main); font-weight: 600; text-decoration: none; font-size: 1.1rem; display: flex; align-items: center; gap: 0.4rem;">
+                                    <i class="ph-fill ph-phone" style="color: ${levelColor};"></i> ${req.phone ? req.phone.replace(/[<&>]/g, '') : 'Not Provided'}
+                                </a>
+                            </div>
+                            <a href="tel:${req.phone ? req.phone.replace(/[^0-9+]/g, '') : ''}" class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem; border-radius: 8px; background: ${levelColor}; color: #fff; border: none; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: inline-flex; align-items: center; gap: 0.4rem;">
+                                <i class="ph ph-phone-call"></i> Call Now
+                            </a>
+                        </div>
+
                         <div style="margin-top:1rem; display:flex; flex-direction:column; gap:0.5rem; font-size:0.9rem; color:var(--text-muted);">
                             <div style="display:flex; align-items:center; gap:0.5rem;"><i class="ph-fill ph-buildings" style="color:var(--text-main);"></i> ${req.hospital || 'Hospital not specified'}</div>
                             <div style="display:flex; align-items:center; gap:0.5rem;"><i class="ph-fill ph-map-pin" style="color:var(--text-main);"></i> ${req.location}</div>

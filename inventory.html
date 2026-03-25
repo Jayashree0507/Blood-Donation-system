@@ -235,17 +235,13 @@
     <script src="app.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const currentUser = JSON.parse(localStorage.getItem('sanguis_user'));
-            // Require Admin Login
+            const rawUser = localStorage.getItem('sanguis_user');
+            const currentUser = rawUser ? JSON.parse(rawUser) : null;
+
+            // Strict Role-Based Access Control: Redirection to Home if not Admin
             if (!currentUser || currentUser.role !== 'admin') {
-                document.querySelector('.inventory-section').innerHTML = `
-                    <div class="glass-panel" style="text-align:center; padding: 6rem 2rem;">
-                        <i class="ph-fill ph-lock-key" style="font-size: 5rem; color: #ff3b30; margin-bottom: 1.5rem;"></i>
-                        <h2 style="color: #fff; margin-bottom: 1rem; font-size: 2.2rem;">Restricted Admin Area</h2>
-                        <p style="color: var(--text-muted); max-width: 500px; margin: 0 auto; line-height: 1.6;">Inventory data maintaining total active units and matched donations is securely restricted and visible exclusively to the system administrator.</p>
-                        <button class="btn btn-primary mt-4" onclick="document.getElementById('loginBtn').click()">Login as Admin</button>
-                    </div>
-                `;
+                alert("Access Denied: You do not have sufficient permissions to view the Inventory Management console. Redirecting to home page...");
+                window.location.href = "index.html";
                 return;
             }
 

@@ -157,6 +157,43 @@
             box-shadow: 0 4px 15px rgba(248, 50, 78, 0.2);
         }
 
+        .registration-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 0.3rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .reg-tab {
+            flex: 1;
+            padding: 0.8rem;
+            border: none;
+            background: none;
+            color: var(--text-muted);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .reg-tab.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(248, 50, 78, 0.3);
+        }
+
+        .reg-tab i {
+            font-size: 1.2rem;
+        }
+
         .input-group label {
             display: block;
             margin-bottom: 0.5rem;
@@ -262,7 +299,7 @@
             </div>
 
             <div class="nav-actions">
-                <button class="btn btn-outline" onclick="window.location.href='index.html'">Login</button>
+                <button class="btn btn-outline" id="loginBtn">Login</button>
             </div>
 
             <button class="mobile-toggle" id="mobileToggle">
@@ -313,13 +350,26 @@
 
                 <!-- Form Section -->
                 <div class="register-form-wrap glass-panel">
-                    <h3>Create Account</h3>
-                    <p class="subtitle">Complete your profile to get started.</p>
+                    <!-- Tab Switcher -->
+                    <div class="registration-tabs">
+                        <button type="button" class="reg-tab active" id="userTabBtn" onclick="toggleFormType('user')">
+                            <i class="ph ph-users"></i> Standard Registration
+                        </button>
+                        <button type="button" class="reg-tab" id="adminTabBtn" onclick="toggleFormType('admin')">
+                            <i class="ph ph-shield-star"></i> Admin Access
+                        </button>
+                    </div>
+
+                    <div id="formTitleArea">
+                        <h3>Create Account</h3>
+                        <p class="subtitle">Complete your profile to get started.</p>
+                    </div>
 
                     <form id="registerForm" onsubmit="handleRegister(event)">
 
-                        <!-- Role Selection -->
-                        <div class="input-group">
+                        <div class="role-selection-area">
+                            <!-- Role Selection -->
+                            <div class="input-group">
                             <label>Select Your Role</label>
                             <div class="role-selector">
                                 <button type="button" class="role-btn active" onclick="setRole('donor', this)">
@@ -330,12 +380,10 @@
                                     <i class="ph ph-bed"></i>
                                     Patient
                                 </button>
-                                <button type="button" class="role-btn" onclick="setRole('admin', this)">
-                                    <i class="ph ph-shield-star"></i>
-                                    Admin
-                                </button>
+                                <!-- Administrator Access Restricted -->
                             </div>
                             <input type="hidden" id="userRole" value="donor" required>
+                        </div>
                         </div>
 
                         <div class="form-grid">
@@ -443,6 +491,42 @@
     </main>
 
     <script>
+        function toggleFormType(type) {
+            const userTab = document.getElementById('userTabBtn');
+            const adminTab = document.getElementById('adminTabBtn');
+            const titleArea = document.getElementById('formTitleArea');
+            const roleSelector = document.querySelector('.role-selection-area');
+            const regFields = document.querySelectorAll('.registration-field');
+            const submitBtn = document.getElementById('registerBtn');
+            const nameLabel = document.getElementById('nameLabel');
+            const nameInput = document.getElementById('fullName');
+
+            if (type === 'admin') {
+                userTab.classList.remove('active');
+                adminTab.classList.add('active');
+                titleArea.innerHTML = '<h3>Administrative Login</h3><p class="subtitle">Secure authentication for system administrators.</p>';
+                
+                // Set role and trigger hide logic
+                document.getElementById('userRole').value = 'admin';
+                roleSelector.style.display = 'none';
+                regFields.forEach(f => f.style.display = 'none');
+                
+                submitBtn.innerHTML = '<i class="ph ph-sign-in"></i> Admin Login';
+                nameLabel.innerText = "Admin Username";
+                nameInput.placeholder = "Enter Username";
+                document.getElementById('password').placeholder = "Enter Admin Password";
+            } else {
+                adminTab.classList.remove('active');
+                userTab.classList.add('active');
+                titleArea.innerHTML = '<h3>Create Account</h3><p class="subtitle">Complete your profile to get started.</p>';
+                
+                roleSelector.style.display = 'block';
+                // Trigger regular role update (defaults back to donor)
+                const activeRoleBtn = document.querySelector('.role-btn.active');
+                if (activeRoleBtn) activeRoleBtn.click();
+            }
+        }
+
         function setRole(role, element) {
             document.getElementById('userRole').value = role;
             document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
@@ -453,26 +537,18 @@
             const nameLabel = document.getElementById('nameLabel');
             const nameInput = document.getElementById('fullName');
 
-            if (role === 'admin') {
-                regFields.forEach(f => f.style.display = 'none');
-                submitBtn.innerHTML = '<i class="ph ph-sign-in"></i> Admin Login';
-                nameLabel.innerText = "Admin Username";
-                nameInput.placeholder = "Enter 'Harini' or 'Jayashree'";
-                document.getElementById('password').placeholder = "Enter Admin Password (Harini@2005)";
-            } else {
-                regFields.forEach(f => f.style.display = 'block');
-                submitBtn.innerHTML = 'Register';
-                nameLabel.innerText = "Full Name";
-                nameInput.placeholder = "John Doe";
-                document.getElementById('password').placeholder = "••••••••";
-                
-                if (role === 'patient') {
-                    document.getElementById('donorFieldGroup').style.display = 'none';
-                    document.getElementById('patientFieldGroup').style.display = 'block';
-                } else if (role === 'donor') {
-                    document.getElementById('donorFieldGroup').style.display = 'block';
-                    document.getElementById('patientFieldGroup').style.display = 'none';
-                }
+            regFields.forEach(f => f.style.display = 'block');
+            submitBtn.innerHTML = '<i class="ph ph-sign-in"></i> Register Account';
+            nameLabel.innerText = "Full Name";
+            nameInput.placeholder = "John Doe";
+            document.getElementById('password').placeholder = "••••••••";
+            
+            if (role === 'patient') {
+                document.getElementById('donorFieldGroup').style.display = 'none';
+                document.getElementById('patientFieldGroup').style.display = 'block';
+            } else if (role === 'donor') {
+                document.getElementById('donorFieldGroup').style.display = 'block';
+                document.getElementById('patientFieldGroup').style.display = 'none';
             }
         }
 
@@ -581,7 +657,7 @@
             if (role === 'admin') {
                 const normalizedName = name.toLowerCase();
                 if ((normalizedName !== 'harini' && normalizedName !== 'jayashree') || password !== 'Harini@2005') {
-                    alert("Unauthorized Request. Administrative access is strictly restricted to Harini and Jayashree. Please verify your credentials.");
+                    alert("Unauthorized Request. Administrative access is strictly restricted to authorized personnel only. Please verify your credentials.");
                     return;
                 }
 
@@ -644,8 +720,16 @@
                 return;
             }
 
-            // Save details dynamically based on user role
-            const phone = document.getElementById('phoneNumber').value;
+            // Validate and sanitize phone number
+            const rawPhone = document.getElementById('phoneNumber').value.trim();
+            const phonePattern = /^[\+]?[0-9\s\-]{7,15}$/;
+            if (!phonePattern.test(rawPhone)) {
+                alert("Please enter a valid phone number containing 7 to 15 digits (plus sign, spaces, and hyphens allowed).");
+                return;
+            }
+            // Sanitize phone input for secure storage (strip potentially dangerous chars, though regex already largely ensures safety)
+            const phone = rawPhone.replace(/[<&>]/g, '');
+
             const group = document.getElementById('bloodGroup').value;
 
             if (role === 'donor') {
